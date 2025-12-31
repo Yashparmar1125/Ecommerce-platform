@@ -1,0 +1,61 @@
+# =========================
+# Global
+# =========================
+.DS_Store
+Thumbs.db
+.env
+.env.*
+*.log
+
+# =========================
+# Python / Django (Backend)
+# =========================
+Backend/__pycache__/
+Backend/**/*.pyc
+Backend/**/*.pyo
+Backend/**/*.pyd
+
+# Virtual environments
+.venv
+Backend/venv/
+Backend/.venv/
+Backend/env/
+
+# Django specific
+Backend/db.sqlite3
+Backend/media/
+Backend/staticfiles/
+
+# Django migrations (optional – keep if you want them tracked)
+Backend/**/migrations/__pycache__/
+
+# Pytest / coverage
+Backend/.pytest_cache/
+Backend/.coverage
+Backend/htmlcov/
+
+# =========================
+# Node / React (Frontend)
+# =========================
+Frontend/node_modules/
+Frontend/npm-debug.log*
+Frontend/yarn-debug.log*
+Frontend/yarn-error.log*
+
+# Build output
+Frontend/build/
+Frontend/dist/
+
+# Environment files
+Frontend/.env
+Frontend/.env.local
+Frontend/.env.development.local
+Frontend/.env.test.local
+Frontend/.env.production.local
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+*.swp
