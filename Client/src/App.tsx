@@ -6,6 +6,8 @@ import { ProductsProvider } from './context/ProductsContext'
 import Layout from './layouts/Layout'
 import PageTransition from './components/PageTransition'
 import ScrollToTop from './components/ScrollToTop'
+import ProtectedRoute from './components/ProtectedRoute'
+import SessionExpiredModal from './components/SessionExpiredModal'
 import HomePage from './pages/HomePage'
 import ProductListingPage from './pages/ProductListingPage'
 import ProductDetailPage from './pages/ProductDetailPage'
@@ -14,6 +16,8 @@ import CheckoutPage from './pages/CheckoutPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ProfilePage from './pages/ProfilePage'
+import OrderDetailPage from './pages/OrderDetailPage'
+import AdminPage from './pages/AdminPage'
 
 function App() {
   const location = useLocation()
@@ -23,6 +27,7 @@ function App() {
       <ProductsProvider>
         <CartProvider>
           <ScrollToTop />
+          <SessionExpiredModal />
           <Layout>
             <AnimatePresence mode="wait">
               <Routes location={location} key={location.pathname}>
@@ -54,7 +59,9 @@ function App() {
                   path="/cart"
                   element={
                     <PageTransition>
-                      <CartPage />
+                      <ProtectedRoute>
+                        <CartPage />
+                      </ProtectedRoute>
                     </PageTransition>
                   }
                 />
@@ -62,7 +69,9 @@ function App() {
                   path="/checkout"
                   element={
                     <PageTransition>
-                      <CheckoutPage />
+                      <ProtectedRoute>
+                        <CheckoutPage />
+                      </ProtectedRoute>
                     </PageTransition>
                   }
                 />
@@ -86,7 +95,27 @@ function App() {
                   path="/profile"
                   element={
                     <PageTransition>
-                      <ProfilePage />
+                      <ProtectedRoute>
+                        <ProfilePage />
+                      </ProtectedRoute>
+                    </PageTransition>
+                  }
+                />
+                <Route
+                  path="/orders/:id"
+                  element={
+                    <PageTransition>
+                      <ProtectedRoute>
+                        <OrderDetailPage />
+                      </ProtectedRoute>
+                    </PageTransition>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <PageTransition>
+                      <AdminPage />
                     </PageTransition>
                   }
                 />

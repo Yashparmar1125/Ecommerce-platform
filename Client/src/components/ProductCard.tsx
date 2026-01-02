@@ -13,7 +13,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
   const [imageIndex, setImageIndex] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
 
-  const discount = product.originalPrice
+  const discount = product.originalPrice && typeof product.originalPrice === 'number' && product.originalPrice > product.price
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0
 
@@ -71,18 +71,33 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
           }}
         >
           {/* Image Container */}
-          <div className="relative aspect-square bg-soft overflow-hidden">
+          <div className="relative aspect-square bg-soft overflow-hidden w-full">
             <AnimatePresence mode="wait">
               <motion.img
                 key={imageIndex}
                 src={product.images[imageIndex] || product.images[0]}
                 alt={product.name}
                 className="w-full h-full object-cover"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center top',
+                  display: 'block'
+                }}
                 initial={{ opacity: 0, scale: 1.1 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.5, ease: [0.6, -0.05, 0.01, 0.99] as [number, number, number, number] }}
                 whileHover={{ scale: 1.08 }}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.style.display = 'none'
+                  const parent = target.parentElement
+                  if (parent) {
+                    parent.innerHTML = '<div class="w-full h-full flex items-center justify-center text-xs text-neutral-400 bg-soft">Image not available</div>'
+                  }
+                }}
               />
             </AnimatePresence>
 
@@ -191,7 +206,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
               >
                 Rs. {product.price.toFixed(2)}
               </motion.span>
-              {product.originalPrice && (
+              {product.originalPrice && typeof product.originalPrice === 'number' && (
                 <motion.span
                   className="text-xs text-neutral-500 line-through"
                   initial={{ opacity: 0 }}

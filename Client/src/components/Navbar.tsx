@@ -27,11 +27,6 @@ const Navbar: React.FC = () => {
     }
   }
 
-  const navItems = [
-    { to: '/profile', icon: 'heart', label: 'Wishlist' },
-    { to: '/cart', icon: 'cart', label: 'Cart', badge: cartCount },
-    { to: user ? '/profile' : '#', icon: 'user', label: 'Profile' },
-  ]
 
   return (
     <>
@@ -127,6 +122,12 @@ const Navbar: React.FC = () => {
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 whileTap={{ scale: 0.9 }}
                 className="p-2 relative"
+                onClick={(e) => {
+                  if (!user) {
+                    e.preventDefault()
+                    setIsLoginModalOpen(true)
+                  }
+                }}
               >
                 <Link to="/profile" className="text-primary">
                   <motion.svg
@@ -147,6 +148,12 @@ const Navbar: React.FC = () => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 className="p-2 relative"
+                onClick={(e) => {
+                  if (!user) {
+                    e.preventDefault()
+                    setIsLoginModalOpen(true)
+                  }
+                }}
               >
                 <Link to="/cart" className="text-primary">
                   <motion.svg

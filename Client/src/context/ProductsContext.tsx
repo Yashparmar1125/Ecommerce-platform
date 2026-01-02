@@ -3,9 +3,17 @@ import type { ReactNode } from 'react'
 import type { Product } from '../types'
 import { productService } from '../services/productService'
 
+interface Category {
+  id: number
+  name: string
+  description: string
+  product_count: number
+}
+
 interface ProductsContextType {
   products: Product[]
   categories: string[]
+  categoryObjects: Category[]
   loading: boolean
   getProductById: (id: string) => Product | undefined
   getProductsByCategory: (category: string) => Product[]
@@ -16,22 +24,29 @@ const ProductsContext = createContext<ProductsContextType | undefined>(undefined
 export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<string[]>([])
+  const [categoryObjects, setCategoryObjects] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const loadData = async () => {
       try {
-        const data = await productService.getAllProducts()
-        setProducts(data)
-        const uniqueCategories = Array.from(new Set(data.map(p => p.category)))
+        // Load products and categories in parallel for faster loading
+        const [productsData, categoriesData] = await Promise.all([
+          productService.getAllProducts(),
+          productService.getCategories()
+        ])
+        
+        setProducts(productsData)
+        setCategoryObjects(categoriesData)
+        const uniqueCategories = Array.from(new Set(productsData.map(p => p.category)))
         setCategories(uniqueCategories)
       } catch (error) {
-        console.error('Failed to load products:', error)
+        console.error('Failed to load data:', error)
       } finally {
         setLoading(false)
       }
     }
-    loadProducts()
+    loadData()
   }, [])
 
   const getProductById = (id: string) => {
@@ -43,7 +58,7 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
   }
 
   return (
-    <ProductsContext.Provider value={{ products, categories, loading, getProductById, getProductsByCategory }}>
+    <ProductsContext.Provider value={{ products, categories, categoryObjects, loading, getProductById, getProductsByCategory }}>
       {children}
     </ProductsContext.Provider>
   )

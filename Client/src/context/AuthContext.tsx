@@ -1,6 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import type { ReactNode } from 'react'
 import type { User, Order } from '../types'
+
+import { emailLogin, getUser, registerUser } from '../api/axios.api'
 
 interface AuthContextType {
   user: User | null
@@ -18,6 +20,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
 
+  const logout = useCallback(() => {
+    setUser(null)
+    setOrders([])
+    localStorage.removeItem('user')
+    localStorage.removeItem('token')
+    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('orders')
+  }, [])
+
   useEffect(() => {
     const savedUser = localStorage.getItem('user')
     const savedOrders = localStorage.getItem('orders')
@@ -27,20 +38,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (savedOrders) {
       setOrders(JSON.parse(savedOrders))
     }
-  }, [])
+
+    // Listen for session expired events
+    const handleSessionExpired = () => {
+      logout()
+    }
+
+    window.addEventListener('session-expired', handleSessionExpired as EventListener)
+
+    return () => {
+      window.removeEventListener('session-expired', handleSessionExpired as EventListener)
+    }
+  }, [logout])
 
   const login = async (email: string, password: string): Promise<boolean> => {
     // Mock authentication - in production, this would call an API
     try {
-      const mockUser: User = {
-        id: '1',
-        name: 'John Doe',
-        email,
-        phone: '+1234567890',
+      const response = await emailLogin(email, password)
+      if (response.status === 200) {
+        localStorage.setItem('token', response.data.tokens.access)
+        localStorage.setItem('refreshToken', response.data.tokens.refresh)
+        const user = await getUser()
+        if (user.status === 200) {
+          setUser(user.data)
+          localStorage.setItem('user', JSON.stringify(user.data))
+        } else {
+          return false
+        }
+        return true
+      } else {
+        return false
       }
-      setUser(mockUser)
-      localStorage.setItem('user', JSON.stringify(mockUser))
-      return true
     } catch (error) {
       return false
     }
@@ -49,15 +77,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const register = async (name: string, email: string, password: string): Promise<boolean> => {
     // Mock registration
     try {
-      const newUser: User = {
-        id: Date.now().toString(),
-        name,
-        email,
-        phone: '',
+      const first_name = name.split(' ')[0]
+      const last_name = name.split(' ')[1]
+      const response = await registerUser(email, password, first_name, last_name)
+      if (response.status === 201) {
+        setUser(response.data.user)
+        localStorage.setItem('user', JSON.stringify(response.data.user))
+        localStorage.setItem('token', response.data.tokens.access)
+        localStorage.setItem('refreshToken', response.data.tokens.refresh)
+        return true
+      } else {
+        return false
       }
-      setUser(newUser)
-      localStorage.setItem('user', JSON.stringify(newUser))
-      return true
     } catch (error) {
       return false
     }
@@ -71,9 +102,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       const googleUser: User = {
         id: Date.now().toString(),
-        name: 'Google User',
+        username: 'Google User',
+        first_name: '',
+        last_name: '',
         email: 'user@gmail.com',
-        phone: '',
+        phone_number: '',
       }
       setUser(googleUser)
       localStorage.setItem('user', JSON.stringify(googleUser))
@@ -81,11 +114,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       return false
     }
-  }
-
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem('user')
   }
 
   const addOrder = (order: Omit<Order, 'id' | 'date'>) => {
