@@ -1,9 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useProducts } from '../context/ProductsContext'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
+import { productService } from '../services/productService'
+import type { Product } from '../types'
 import Button from '../components/Button'
+import LoginModal from '../components/LoginModal'
 import { fadeInUp } from '../utils/animations'
 
 const ProductDetailPage: React.FC = () => {
@@ -11,7 +15,26 @@ const ProductDetailPage: React.FC = () => {
   const navigate = useNavigate()
   const { getProductById } = useProducts()
   const { addToCart } = useCart()
-  const product = id ? getProductById(id) : undefined
+  const { user } = useAuth()
+  const [product, setProduct] = useState<Product | undefined>(id ? getProductById(id) : undefined)
+  const [loading, setLoading] = useState(!product)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+
+  useEffect(() => {
+    if (id && !product) {
+      const fetchProduct = async () => {
+        try {
+          const fetchedProduct = await productService.getProductById(id)
+          setProduct(fetchedProduct)
+        } catch (error) {
+          console.error('Failed to fetch product:', error)
+        } finally {
+          setLoading(false)
+        }
+      }
+      fetchProduct()
+    }
+  }, [id, product])
 
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedSize, setSelectedSize] = useState('')
@@ -19,6 +42,17 @@ const ProductDetailPage: React.FC = () => {
   const [quantity, setQuantity] = useState(1)
   const [isAdding, setIsAdding] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-primary">Loading product...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (!product) {
     return (
@@ -36,6 +70,11 @@ const ProductDetailPage: React.FC = () => {
   }
 
   const handleAddToCart = () => {
+    if (!user) {
+      setIsLoginModalOpen(true)
+      return
+    }
+
     if (!selectedSize || !selectedColor) {
       alert('Please select size and color')
       return
@@ -59,7 +98,7 @@ const ProductDetailPage: React.FC = () => {
     }, 300)
   }
 
-  const discount = product.originalPrice
+  const discount = product.originalPrice && typeof product.originalPrice === 'number' && product.originalPrice > product.price
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 0
 
@@ -83,6 +122,13 @@ const ProductDetailPage: React.FC = () => {
                 src={product.images[selectedImage] || product.images[0]}
                 alt={product.name}
                 className="w-full h-full object-cover"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: 'center top',
+                  display: 'block'
+                }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -111,6 +157,13 @@ const ProductDetailPage: React.FC = () => {
                     src={image}
                     alt={`${product.name} ${index + 1}`}
                     className="w-full h-full object-cover"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      objectPosition: 'center top',
+                      display: 'block'
+                    }}
                   />
                 </motion.button>
               ))}
@@ -132,7 +185,7 @@ const ProductDetailPage: React.FC = () => {
 
             <div className="flex items-baseline gap-4 mb-6">
               <span className="text-2xl font-medium text-primary">Rs. {product.price.toFixed(2)}</span>
-              {product.originalPrice && (
+              {product.originalPrice && typeof product.originalPrice === 'number' && (
                 <>
                   <span className="text-lg text-neutral-500 line-through">
                     Rs. {product.originalPrice.toFixed(2)}
@@ -272,6 +325,10 @@ const ProductDetailPage: React.FC = () => {
           </div>
         </motion.div>
       </div>
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </div>
   )
 }

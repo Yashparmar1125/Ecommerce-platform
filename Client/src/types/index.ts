@@ -21,24 +21,31 @@ export interface CartItem {
   size: string
   color: string
   quantity: number
+  skuId?: number // Optional SKU ID for order creation
 }
 
 export interface User {
   id: string
-  name: string
+  username: string
+  first_name: string
+  last_name: string
   email: string
-  phone: string
+  phone_number: string
 }
 
 export interface Address {
-  id: string
+  id: number | string
   name: string
   street: string
   city: string
   state: string
-  zipCode: string
+  zip_code?: string
+  zipCode?: string // For backward compatibility
   phone: string
-  isDefault?: boolean
+  is_default?: boolean
+  isDefault?: boolean // For backward compatibility
+  created_at?: string
+  updated_at?: string
 }
 
 export interface Order {

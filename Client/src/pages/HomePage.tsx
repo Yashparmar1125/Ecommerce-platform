@@ -19,17 +19,20 @@ import {
 } from '../utils/animations'
 
 const HomePage: React.FC = () => {
-  const { products } = useProducts()
+  const { products, loading } = useProducts()
+  // Get featured products for editorial section
+  const featuredProducts = products.filter(p => p.featured)
   const newArrivals = products.slice(0, 6)
-  const editorial = products.slice(6, 10)
+  const editorial = featuredProducts.slice(0, 4).length > 0 ? featuredProducts.slice(0, 4) : products.slice(6, 10)
   const collection = products.slice(0, 12)
 
   const newArrivalsRef = useRef(null)
   const editorialRef = useRef(null)
   const collectionRef = useRef(null)
   const servicesRef = useRef(null)
-  const containerRef = useRef(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
+  // Only use scroll when container is mounted
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
@@ -40,7 +43,7 @@ const HomePage: React.FC = () => {
   const collectionInView = useInView(collectionRef, { once: true, amount: 0.2 })
   const servicesInView = useInView(servicesRef, { once: true, amount: 0.3 })
 
-  // Parallax transforms
+  // Parallax transforms - only when scrollYProgress is available
   const y1 = useTransform(scrollYProgress, [0, 1], [0, -50])
   const y2 = useTransform(scrollYProgress, [0, 1], [0, -100])
   const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.8, 0.6])
@@ -99,21 +102,28 @@ const HomePage: React.FC = () => {
   ]
 
   return (
-    <div ref={containerRef} className="overflow-hidden relative">
+    <div 
+      ref={containerRef} 
+      className="overflow-hidden relative"
+      style={{ position: 'relative', minHeight: '100vh' }}
+    >
+      {loading && (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-primary">Loading products...</p>
+          </div>
+        </div>
+      )}
+      {!loading && (
+        <>
       {/* Hero Banner Carousel */}
       <motion.div style={{ y: y1, opacity }}>
         <BannerCarousel />
       </motion.div>
 
       {/* Categories Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-100px' }}
-        transition={smoothTransition}
-      >
-        <CategorySection />
-      </motion.div>
+      <CategorySection />
 
       {/* New Arrivals */}
       <section ref={newArrivalsRef} className="py-32 bg-background relative">
@@ -121,13 +131,15 @@ const HomePage: React.FC = () => {
           <div className="flex items-end justify-between mb-20">
             <motion.div
               initial={{ opacity: 0, x: -60 }}
-              animate={newArrivalsInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
               transition={{ ...smoothTransition, delay: 0.2 }}
             >
               <motion.span
                 className="text-xs font-medium text-primary uppercase tracking-wider mb-6 block border-b border-primary pb-3 inline-block"
                 initial={{ opacity: 0, width: 0 }}
-                animate={newArrivalsInView ? { opacity: 1, width: 'auto' } : { opacity: 0, width: 0 }}
+                whileInView={{ opacity: 1, width: 'auto' }}
+                viewport={{ once: true, amount: 0.2 }}
                 transition={{ delay: 0.4, ...smoothTransition }}
               >
                 New Arrivals
@@ -135,7 +147,8 @@ const HomePage: React.FC = () => {
               <motion.h2
                 className="text-5xl md:text-6xl lg:text-7xl font-heading font-medium text-primary leading-[1.1] mb-4"
                 initial={{ opacity: 0, y: 40 }}
-                animate={newArrivalsInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
                 transition={{ delay: 0.3, ...smoothTransition }}
               >
                 Latest Collection
@@ -143,7 +156,8 @@ const HomePage: React.FC = () => {
               <motion.p
                 className="text-sm text-neutral-600 max-w-xl mt-6"
                 initial={{ opacity: 0 }}
-                animate={newArrivalsInView ? { opacity: 1 } : { opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, amount: 0.2 }}
                 transition={{ delay: 0.5, ...smoothTransition }}
               >
                 Discover our newest pieces, carefully curated for the modern wardrobe
@@ -151,7 +165,8 @@ const HomePage: React.FC = () => {
             </motion.div>
             <motion.div
               initial={{ opacity: 0, x: 60 }}
-              animate={newArrivalsInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
               transition={{ delay: 0.4, ...smoothTransition }}
             >
               <Link to="/products">
@@ -165,7 +180,8 @@ const HomePage: React.FC = () => {
             className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6"
             variants={staggerContainer}
             initial="initial"
-            animate={newArrivalsInView ? 'animate' : 'initial'}
+            whileInView="animate"
+            viewport={{ once: true, amount: 0.2 }}
           >
             {newArrivals.map((product, index) => (
               <ProductCard key={product.id} product={product} index={index} />
@@ -402,6 +418,8 @@ const HomePage: React.FC = () => {
           </motion.div>
         </div>
       </section>
+        </>
+      )}
     </div>
   )
 }

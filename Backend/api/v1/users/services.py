@@ -1,7 +1,8 @@
 # apps/users/services.py
 from django.contrib.auth import authenticate
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
 from rest_framework_simplejwt.tokens import RefreshToken
-from apps.users.models import User
+from apps.users.models import User, Address
 
 class UserService:
 
@@ -24,9 +25,9 @@ class UserService:
     def authenticate_user(email, password):
         user = authenticate(username=email, password=password)
         if not user:
-            raise ValueError("Invalid email or password")
+            raise AuthenticationFailed("Invalid email or password")
         if not user.is_active:
-            raise ValueError("Account is disabled")
+            raise PermissionDenied("Account is disabled")
         return user
 
     @staticmethod
@@ -41,3 +42,39 @@ class UserService:
     def logout(refresh_token):
         token = RefreshToken(refresh_token)
         token.blacklist()
+
+
+class AddressService:
+    """Service for address operations - business logic separated from views"""
+    
+    @staticmethod
+    def get_user_addresses(user):
+        """Get all addresses for a user"""
+        return Address.objects.filter(user=user).order_by('-is_default', '-created_at')
+    
+    @staticmethod
+    def create_address(user, validated_data):
+        """Create a new address for a user"""
+        # If setting as default, unset other default addresses
+        if validated_data.get('is_default', False):
+            Address.objects.filter(user=user, is_default=True).update(is_default=False)
+        
+        address = Address.objects.create(user=user, **validated_data)
+        return address
+    
+    @staticmethod
+    def update_address(address, validated_data):
+        """Update an existing address"""
+        # If setting as default, unset other default addresses
+        if validated_data.get('is_default', False):
+            Address.objects.filter(user=address.user, is_default=True).exclude(id=address.id).update(is_default=False)
+        
+        for key, value in validated_data.items():
+            setattr(address, key, value)
+        address.save()
+        return address
+    
+    @staticmethod
+    def delete_address(address):
+        """Delete an address"""
+        address.delete()

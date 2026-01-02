@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useProducts } from '../context/ProductsContext'
@@ -7,9 +7,19 @@ import Select from '../components/Select'
 import { staggerContainer } from '../utils/animations'
 
 const ProductListingPage: React.FC = () => {
-  const [searchParams] = useSearchParams()
-  const { products } = useProducts()
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const { products, loading } = useProducts()
+  const categoryFromUrl = searchParams.get('category')
+  const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl || 'All')
+  
+  // Update selected category when URL changes
+  useEffect(() => {
+    if (categoryFromUrl) {
+      setSelectedCategory(categoryFromUrl)
+    } else {
+      setSelectedCategory('All')
+    }
+  }, [categoryFromUrl])
   const [priceRange, setPriceRange] = useState('all')
   const [selectedSize, setSelectedSize] = useState('all')
   const [selectedColor, setSelectedColor] = useState('all')
@@ -60,6 +70,17 @@ const ProductListingPage: React.FC = () => {
     return filtered
   }, [products, selectedCategory, priceRange, selectedSize, selectedColor, sortBy])
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-primary">Loading products...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
       <div className="flex flex-col md:flex-row gap-12">
@@ -80,7 +101,15 @@ const ProductListingPage: React.FC = () => {
                 {categories.map((category) => (
                   <button
                     key={category}
-                    onClick={() => setSelectedCategory(category)}
+                    onClick={() => {
+                      setSelectedCategory(category)
+                      // Update URL when category is selected
+                      if (category === 'All') {
+                        setSearchParams({})
+                      } else {
+                        setSearchParams({ category })
+                      }
+                    }}
                     className={`block w-full text-left px-4 py-2 text-sm transition-all duration-200 ${
                       selectedCategory === category
                         ? 'border-l-2 border-primary text-primary font-medium'

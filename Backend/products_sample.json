@@ -1,0 +1,381 @@
+[
+  {
+    "name": "RSVP by Nykaa Fashion",
+    "summary": "Red Collared Full Sleeves Cable Knit Midi Dress With Belt",
+    "description": "Chic red midi dress featuring a cable knit design, collar, and belt for a defined waist.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/7/f/7fb7191PL2WW3010AB_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 4795,
+    "featured": true,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/7/f/7fb7191PL2WW3010AB_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "RSVP-RED-XS", "price": 3836, "quantity": 10, "size": "XS", "color": "Red" },
+      { "sku": "RSVP-RED-S", "price": 3836, "quantity": 15, "size": "S", "color": "Red" },
+      { "sku": "RSVP-RED-M", "price": 3836, "quantity": 20, "size": "M", "color": "Red" },
+      { "sku": "RSVP-RED-L", "price": 3836, "quantity": 12, "size": "L", "color": "Red" },
+      { "sku": "RSVP-RED-XL", "price": 3836, "quantity": 8, "size": "XL", "color": "Red" }
+    ]
+  },
+  {
+    "name": "H&M",
+    "summary": "Women Black Flutter-Sleeve Dress With Broderie Anglaise",
+    "description": "Stylish black dress with flutter sleeves and intricate broderie anglaise details.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/b/e/be9155d1278037003_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 1999,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/b/e/be9155d1278037003_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "HM-BLK-XS", "price": 1999, "quantity": 20, "size": "XS", "color": "Black" },
+      { "sku": "HM-BLK-S", "price": 1999, "quantity": 25, "size": "S", "color": "Black" },
+      { "sku": "HM-BLK-M", "price": 1999, "quantity": 30, "size": "M", "color": "Black" },
+      { "sku": "HM-BLK-L", "price": 1999, "quantity": 18, "size": "L", "color": "Black" },
+      { "sku": "HM-BLK-XL", "price": 1999, "quantity": 10, "size": "XL", "color": "Black" }
+    ]
+  },
+  {
+    "name": "Styli",
+    "summary": "Three Fourth Sleeve Schiffli Shirt Midi Dress",
+    "description": "Elegant midi dress with three-fourth sleeves and schiffli detailing, perfect for casual outings.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/1/7/170c470ST7004027536_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 1899,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/1/7/170c470ST7004027536_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "STY-MID-XS", "price": 1596, "quantity": 15, "size": "XS", "color": "White" },
+      { "sku": "STY-MID-S", "price": 1596, "quantity": 20, "size": "S", "color": "White" },
+      { "sku": "STY-MID-M", "price": 1596, "quantity": 25, "size": "M", "color": "White" },
+      { "sku": "STY-MID-L", "price": 1596, "quantity": 15, "size": "L", "color": "White" },
+      { "sku": "STY-MID-XL", "price": 1596, "quantity": 10, "size": "XL", "color": "White" }
+    ]
+  },
+  {
+    "name": "ZUMMER",
+    "summary": "Off White Embroidered Flared Midi Dress",
+    "description": "Beautiful off-white flared midi dress with delicate embroidery.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/b/f/bf9429eDS00OW5230OffWhite_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 5899,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/b/f/bf9429eDS00OW5230OffWhite_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "ZUM-OW-XS", "price": 2124, "quantity": 8, "size": "XS", "color": "Off White" },
+      { "sku": "ZUM-OW-S", "price": 2124, "quantity": 12, "size": "S", "color": "Off White" },
+      { "sku": "ZUM-OW-M", "price": 2124, "quantity": 15, "size": "M", "color": "Off White" },
+      { "sku": "ZUM-OW-L", "price": 2124, "quantity": 10, "size": "L", "color": "Off White" },
+      { "sku": "ZUM-OW-XL", "price": 2124, "quantity": 6, "size": "XL", "color": "Off White" }
+    ]
+  },
+  {
+    "name": "Miss Chase",
+    "summary": "Women's Navy Blue Short Sleeve Embellished Fit and Flare Maxi Party Dress",
+    "description": "Stunning navy blue maxi dress with embellishments, fit and flare silhouette, perfect for parties.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/7/c/7c39942MISAA00007107_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 3745,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/7/c/7c39942MISAA00007107_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "MC-NB-XS", "price": 2472, "quantity": 10, "size": "XS", "color": "Navy Blue" },
+      { "sku": "MC-NB-S", "price": 2472, "quantity": 15, "size": "S", "color": "Navy Blue" },
+      { "sku": "MC-NB-M", "price": 2472, "quantity": 20, "size": "M", "color": "Navy Blue" },
+      { "sku": "MC-NB-L", "price": 2472, "quantity": 12, "size": "L", "color": "Navy Blue" },
+      { "sku": "MC-NB-XL", "price": 2472, "quantity": 8, "size": "XL", "color": "Navy Blue" }
+    ]
+  },
+  {
+    "name": "PIMU",
+    "summary": "Womens Graphic Blue Dress with Belt",
+    "description": "Trendy graphic blue dress accompanied by a belt for a stylish look.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/3/8/385fff1DPN83RoyalBlue_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 3999,
+    "featured": true,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/3/8/385fff1DPN83RoyalBlue_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "PIMU-BLU-XS", "price": 1000, "quantity": 25, "size": "XS", "color": "Blue" },
+      { "sku": "PIMU-BLU-S", "price": 1000, "quantity": 30, "size": "S", "color": "Blue" },
+      { "sku": "PIMU-BLU-M", "price": 1000, "quantity": 35, "size": "M", "color": "Blue" },
+      { "sku": "PIMU-BLU-L", "price": 1000, "quantity": 20, "size": "L", "color": "Blue" },
+      { "sku": "PIMU-BLU-XL", "price": 1000, "quantity": 15, "size": "XL", "color": "Blue" }
+    ]
+  },
+  {
+    "name": "Mabish By Sonal Jain",
+    "summary": "Women Green Animal Print Mini Dress",
+    "description": "Bold green animal print mini dress for a fierce fashion statement.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/b/b/bb903bdTP0543VFA4_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 3199,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/b/b/bb903bdTP0543VFA4_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "MBSJ-GRN-XS", "price": 1056, "quantity": 12, "size": "XS", "color": "Green" },
+      { "sku": "MBSJ-GRN-S", "price": 1056, "quantity": 18, "size": "S", "color": "Green" },
+      { "sku": "MBSJ-GRN-M", "price": 1056, "quantity": 24, "size": "M", "color": "Green" },
+      { "sku": "MBSJ-GRN-L", "price": 1056, "quantity": 14, "size": "L", "color": "Green" },
+      { "sku": "MBSJ-GRN-XL", "price": 1056, "quantity": 8, "size": "XL", "color": "Green" }
+    ]
+  },
+  {
+    "name": "H&M",
+    "summary": "Women Black Knitted Dress",
+    "description": "Cozy and chic black knitted dress, a versatile addition to any wardrobe.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/2/f/2fb92681315067001_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 2499,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/2/f/2fb92681315067001_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "HM-KNT-XS", "price": 2499, "quantity": 20, "size": "XS", "color": "Black" },
+      { "sku": "HM-KNT-S", "price": 2499, "quantity": 25, "size": "S", "color": "Black" },
+      { "sku": "HM-KNT-M", "price": 2499, "quantity": 30, "size": "M", "color": "Black" },
+      { "sku": "HM-KNT-L", "price": 2499, "quantity": 20, "size": "L", "color": "Black" },
+      { "sku": "HM-KNT-XL", "price": 2499, "quantity": 10, "size": "XL", "color": "Black" }
+    ]
+  },
+  {
+    "name": "Monte Carlo",
+    "summary": "Maroon Solid Round Neck Dress",
+    "description": "Classic maroon solid dress with a comfortable round neck.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/3/9/3956c271239755TP-1_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 1960,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/3/9/3956c271239755TP-1_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "MC-MAR-XS", "price": 1372, "quantity": 15, "size": "XS", "color": "Maroon" },
+      { "sku": "MC-MAR-S", "price": 1372, "quantity": 20, "size": "S", "color": "Maroon" },
+      { "sku": "MC-MAR-M", "price": 1372, "quantity": 25, "size": "M", "color": "Maroon" },
+      { "sku": "MC-MAR-L", "price": 1372, "quantity": 18, "size": "L", "color": "Maroon" },
+      { "sku": "MC-MAR-XL", "price": 1372, "quantity": 10, "size": "XL", "color": "Maroon" }
+    ]
+  },
+  {
+    "name": "Styli",
+    "summary": "Women White Wrap Over Tie Waist A-Line Midi Dress",
+    "description": "Flattering white A-line midi dress featuring a wrap-over design and tie waist.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/0/6/06f6ddb7008644424_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 2499,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/0/6/06f6ddb7008644424_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "STY-WHT-XS", "price": 1750, "quantity": 18, "size": "XS", "color": "White" },
+      { "sku": "STY-WHT-S", "price": 1750, "quantity": 22, "size": "S", "color": "White" },
+      { "sku": "STY-WHT-M", "price": 1750, "quantity": 28, "size": "M", "color": "White" },
+      { "sku": "STY-WHT-L", "price": 1750, "quantity": 15, "size": "L", "color": "White" },
+      { "sku": "STY-WHT-XL", "price": 1750, "quantity": 10, "size": "XL", "color": "White" }
+    ]
+  },
+  {
+    "name": "Cider",
+    "summary": "Black Solid Scoop Neck Maxi Dress",
+    "description": "Elegant black solid maxi dress with a scoop neck and ruched detailing.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/1/a/1ad5313NF-CD20221111206490LD-Black_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 4499,
+    "featured": true,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/1/a/1ad5313NF-CD20221111206490LD-Black_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "CID-BLK-XS", "price": 2565, "quantity": 10, "size": "XS", "color": "Black" },
+      { "sku": "CID-BLK-S", "price": 2565, "quantity": 15, "size": "S", "color": "Black" },
+      { "sku": "CID-BLK-M", "price": 2565, "quantity": 20, "size": "M", "color": "Black" },
+      { "sku": "CID-BLK-L", "price": 2565, "quantity": 12, "size": "L", "color": "Black" },
+      { "sku": "CID-BLK-XL", "price": 2565, "quantity": 8, "size": "XL", "color": "Black" }
+    ]
+  },
+  {
+    "name": "AAREIN",
+    "summary": "Women Pink Floral Printed A Line Midi Dress",
+    "description": "Lovely pink A-line midi dress featuring a floral print.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/8/7/87d25dbADR-5372_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 2299,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/8/7/87d25dbADR-5372_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "AAR-PNK-XS", "price": 1288, "quantity": 20, "size": "XS", "color": "Pink" },
+      { "sku": "AAR-PNK-S", "price": 1288, "quantity": 25, "size": "S", "color": "Pink" },
+      { "sku": "AAR-PNK-M", "price": 1288, "quantity": 30, "size": "M", "color": "Pink" },
+      { "sku": "AAR-PNK-L", "price": 1288, "quantity": 20, "size": "L", "color": "Pink" },
+      { "sku": "AAR-PNK-XL", "price": 1288, "quantity": 10, "size": "XL", "color": "Pink" }
+    ]
+  },
+  {
+    "name": "Outzidr",
+    "summary": "Burgundy High Neck Wide Spaced Rib Dress",
+    "description": "Stylish burgundy high neck dress with a wide spaced rib texture.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/f/1/f16ffafWMN129582072534_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 1749,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/f/1/f16ffafWMN129582072534_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "OUT-BUR-XS", "price": 1749, "quantity": 15, "size": "XS", "color": "Burgundy" },
+      { "sku": "OUT-BUR-S", "price": 1749, "quantity": 20, "size": "S", "color": "Burgundy" },
+      { "sku": "OUT-BUR-M", "price": 1749, "quantity": 25, "size": "M", "color": "Burgundy" },
+      { "sku": "OUT-BUR-L", "price": 1749, "quantity": 15, "size": "L", "color": "Burgundy" },
+      { "sku": "OUT-BUR-XL", "price": 1749, "quantity": 10, "size": "XL", "color": "Burgundy" }
+    ]
+  },
+  {
+    "name": "Miss Chase",
+    "summary": "Women's Black Relaxed Fit V-Neck 3/4th Sleeve Laced Maxi Party Dress",
+    "description": "Elegant black maxi party dress featuring lace details, a V-neck, and 3/4th sleeves.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/7/c/7c39942MISAA00008322_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 3199,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/7/c/7c39942MISAA00008322_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "MC-BLK-XS", "price": 1792, "quantity": 10, "size": "XS", "color": "Black" },
+      { "sku": "MC-BLK-S", "price": 1792, "quantity": 15, "size": "S", "color": "Black" },
+      { "sku": "MC-BLK-M", "price": 1792, "quantity": 20, "size": "M", "color": "Black" },
+      { "sku": "MC-BLK-L", "price": 1792, "quantity": 12, "size": "L", "color": "Black" },
+      { "sku": "MC-BLK-XL", "price": 1792, "quantity": 8, "size": "XL", "color": "Black" }
+    ]
+  },
+  {
+    "name": "PURVAJA",
+    "summary": "Women Printed Navy Blue Midi Dress",
+    "description": "Navy blue midi dress with a charming print, perfect for everyday wear.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/6/1/611629bMDWini210_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 3299,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/6/1/611629bMDWini210_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "PUR-NVY-XS", "price": 957, "quantity": 25, "size": "XS", "color": "Navy Blue" },
+      { "sku": "PUR-NVY-S", "price": 957, "quantity": 30, "size": "S", "color": "Navy Blue" },
+      { "sku": "PUR-NVY-M", "price": 957, "quantity": 35, "size": "M", "color": "Navy Blue" },
+      { "sku": "PUR-NVY-L", "price": 957, "quantity": 20, "size": "L", "color": "Navy Blue" },
+      { "sku": "PUR-NVY-XL", "price": 957, "quantity": 15, "size": "XL", "color": "Navy Blue" }
+    ]
+  },
+  {
+    "name": "Aask",
+    "summary": "Ask Fancy White Designer Dress with Belt Women (Set of 2)",
+    "description": "Fancy white designer dress set with a belt, perfect for a chic and modern look.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/c/7/c738260PL105WhiteWhite_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 2999,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/c/7/c738260PL105WhiteWhite_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "AASK-WHT-XS", "price": 990, "quantity": 15, "size": "XS", "color": "White" },
+      { "sku": "AASK-WHT-S", "price": 990, "quantity": 20, "size": "S", "color": "White" },
+      { "sku": "AASK-WHT-M", "price": 990, "quantity": 25, "size": "M", "color": "White" },
+      { "sku": "AASK-WHT-L", "price": 990, "quantity": 15, "size": "L", "color": "White" },
+      { "sku": "AASK-WHT-XL", "price": 990, "quantity": 10, "size": "XL", "color": "White" }
+    ]
+  },
+  {
+    "name": "Pomelo",
+    "summary": "Knit Top Dress - Black",
+    "description": "Stylish black knit top dress offering both comfort and elegance.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/c/7/c7bef2d236510Black_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 6599,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/c/7/c7bef2d236510Black_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "POM-BLK-XS", "price": 4950, "quantity": 8, "size": "XS", "color": "Black" },
+      { "sku": "POM-BLK-S", "price": 4950, "quantity": 12, "size": "S", "color": "Black" },
+      { "sku": "POM-BLK-M", "price": 4950, "quantity": 15, "size": "M", "color": "Black" },
+      { "sku": "POM-BLK-L", "price": 4950, "quantity": 10, "size": "L", "color": "Black" },
+      { "sku": "POM-BLK-XL", "price": 4950, "quantity": 5, "size": "XL", "color": "Black" }
+    ]
+  },
+  {
+    "name": "PIMU",
+    "summary": "Womens Graphic Black Dress with Belt",
+    "description": "Modern graphic black dress featuring a belt for a chic silhouette.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/3/8/385fff1DPN83Black_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 3999,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/3/8/385fff1DPN83Black_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "PIMU-BLK-XS", "price": 1000, "quantity": 25, "size": "XS", "color": "Black" },
+      { "sku": "PIMU-BLK-S", "price": 1000, "quantity": 30, "size": "S", "color": "Black" },
+      { "sku": "PIMU-BLK-M", "price": 1000, "quantity": 35, "size": "M", "color": "Black" },
+      { "sku": "PIMU-BLK-L", "price": 1000, "quantity": 20, "size": "L", "color": "Black" },
+      { "sku": "PIMU-BLK-XL", "price": 1000, "quantity": 15, "size": "XL", "color": "Black" }
+    ]
+  },
+  {
+    "name": "Mabish By Sonal Jain",
+    "summary": "Short Flare Dress with Cut-Out Back",
+    "description": "Fun and flirty short flare dress featuring a cut-out back design.",
+    "category": "Western Wear",
+    "cover": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/5/0/50a6dabTC0543VFRE_1.jpg?rnd=20200526195200&tr=w-512",
+    "original_price": 2599,
+    "featured": false,
+    "in_stock": true,
+    "images": [
+      "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/5/0/50a6dabTC0543VFRE_1.jpg?rnd=20200526195200&tr=w-900"
+    ],
+    "skus": [
+      { "sku": "MBSJ-FLR-XS", "price": 936, "quantity": 15, "size": "XS", "color": "Red" },
+      { "sku": "MBSJ-FLR-S", "price": 936, "quantity": 20, "size": "S", "color": "Red" },
+      { "sku": "MBSJ-FLR-M", "price": 936, "quantity": 25, "size": "M", "color": "Red" },
+      { "sku": "MBSJ-FLR-L", "price": 936, "quantity": 15, "size": "L", "color": "Red" },
+      { "sku": "MBSJ-FLR-XL", "price": 936, "quantity": 10, "size": "XL", "color": "Red" }
+    ]
+  }]
