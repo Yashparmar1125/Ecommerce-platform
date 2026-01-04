@@ -1,0 +1,210 @@
+<section id="products">
+    <nav class="text-sm text-neutral-600 mb-6">
+        <span>Home</span> <span class="mx-2">></span> <span class="text-primary">Products</span>
+    </nav>
+    <h1 class="text-4xl font-heading font-medium text-primary mb-8">Products</h1>
+    <p class="text-base text-neutral-700 mb-8">Product catalog endpoints. All endpoints are public and do not require authentication.</p>
+    
+    <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+            <span class="endpoint-method method-get">GET</span>
+            <code class="text-base font-mono">/api/v1/products/</code>
+        </div>
+        <p class="text-sm text-neutral-600 mb-4">Get all products. Public endpoint.</p>
+        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Query Parameters</h4>
+        <ul class="list-disc list-inside text-sm text-neutral-600 mb-4 space-y-1">
+            <li><code>featured</code> - Filter featured products (true/false)</li>
+            <li><code>category</code> - Filter by category name</li>
+        </ul>
+        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Example Request</h4>
+        <div class="code-block p-4 mb-4">
+            <pre>GET /api/v1/products/?featured=true&category=Electronics</pre>
+        </div>
+        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Response (200 OK)</h4>
+        <div class="code-block p-4 mb-4">
+            <pre>{
+  "count": 10,
+  "data": [
+    {
+      "id": 1,
+      "name": "Product Name",
+      "summary": "Product summary",
+      "description": "Full product description",
+      "category": "Electronics",
+      "cover": "https://example.com/image.jpg",
+      "original_price": 149.99,
+      "price": 99.99,
+      "featured": true,
+      "in_stock": true,
+      "images": [
+        "https://example.com/image1.jpg",
+        "https://example.com/image2.jpg"
+      ],
+      "sizes": ["S", "M", "L"],
+      "colors": ["Black", "White"],
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  ]
+}</pre>
+        </div>
+    </div>
+
+    <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+            <span class="endpoint-method method-get">GET</span>
+            <code class="text-base font-mono">/api/v1/products/&lt;id&gt;/</code>
+        </div>
+        <p class="text-sm text-neutral-600 mb-4">Get product details with SKUs. Public endpoint.</p>
+        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Response (200 OK)</h4>
+        <div class="code-block p-4 mb-4">
+            <pre>{
+  "data": {
+    "product": {
+      "id": 1,
+      "name": "Product Name",
+      "summary": "Product summary",
+      "description": "Full product description",
+      "category": "Electronics",
+      "cover": "https://example.com/image.jpg",
+      "original_price": 149.99,
+      "price": 99.99,
+      "featured": true,
+      "in_stock": true,
+      "images": [
+        "https://example.com/image1.jpg",
+        "https://example.com/image2.jpg"
+      ],
+      "sizes": ["S", "M", "L"],
+      "colors": ["Black", "White"],
+      "created_at": "2024-01-01T00:00:00Z"
+    },
+    "skus": [
+      {
+        "id": 1,
+        "sku": "PROD-001-S-M-BLK",
+        "size": "S",
+        "color": "Black",
+        "price": 99.99,
+        "quantity": 50
+      },
+      {
+        "id": 2,
+        "sku": "PROD-001-M-M-BLK",
+        "size": "M",
+        "color": "Black",
+        "price": 99.99,
+        "quantity": 30
+      }
+    ]
+  }
+}</pre>
+        </div>
+        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Error Response (404 Not Found)</h4>
+        <div class="code-block p-4">
+            <pre>{
+  "error": "Product not found",
+  "detail": "No product found with id 999"
+}</pre>
+        </div>
+    </div>
+
+    <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+            <span class="endpoint-method method-get">GET</span>
+            <code class="text-base font-mono">/api/v1/products/&lt;id&gt;/skus/</code>
+        </div>
+        <p class="text-sm text-neutral-600 mb-4">Get all SKUs for a product. Public endpoint.</p>
+        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Response (200 OK)</h4>
+        <div class="code-block p-4 mb-4">
+            <pre>{
+  "count": 6,
+  "data": [
+    {
+      "id": 1,
+      "sku": "PROD-001-S-M-BLK",
+      "size": "S",
+      "color": "Black",
+      "price": 99.99,
+      "quantity": 50
+    },
+    {
+      "id": 2,
+      "sku": "PROD-001-M-M-BLK",
+      "size": "M",
+      "color": "Black",
+      "price": 99.99,
+      "quantity": 30
+    }
+  ]
+}</pre>
+        </div>
+    </div>
+
+    <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+            <span class="endpoint-method method-get">GET</span>
+            <code class="text-base font-mono">/api/v1/products/search/</code>
+        </div>
+        <p class="text-sm text-neutral-600 mb-4">Search products by query string. Public endpoint.</p>
+        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Query Parameters</h4>
+        <ul class="list-disc list-inside text-sm text-neutral-600 mb-4 space-y-1">
+            <li><code>q</code> - Search query string (required)</li>
+        </ul>
+        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Example Request</h4>
+        <div class="code-block p-4 mb-4">
+            <pre>GET /api/v1/products/search/?q=laptop</pre>
+        </div>
+        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Response (200 OK)</h4>
+        <div class="code-block p-4 mb-4">
+            <pre>{
+  "query": "laptop",
+  "count": 5,
+  "data": [
+    {
+      "id": 1,
+      "name": "Gaming Laptop",
+      "price": 1299.99,
+      ...
+    }
+  ]
+}</pre>
+        </div>
+        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Response (200 OK - No Query)</h4>
+        <div class="code-block p-4">
+            <pre>{
+  "count": 0,
+  "data": [],
+  "message": "Search query is required"
+}</pre>
+        </div>
+    </div>
+
+    <div class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+            <span class="endpoint-method method-get">GET</span>
+            <code class="text-base font-mono">/api/v1/products/categories/</code>
+        </div>
+        <p class="text-sm text-neutral-600 mb-4">Get all product categories. Public endpoint.</p>
+        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Response (200 OK)</h4>
+        <div class="code-block p-4">
+            <pre>{
+  "count": 5,
+  "data": [
+    {
+      "id": 1,
+      "name": "Electronics",
+      "description": "Electronic products",
+      "product_count": 25
+    },
+    {
+      "id": 2,
+      "name": "Clothing",
+      "description": "Clothing and apparel",
+      "product_count": 40
+    }
+  ]
+}</pre>
+        </div>
+    </div>
+</section>
+
