@@ -1,8 +1,9 @@
 import axios, { AxiosError } from 'axios'
 import type { InternalAxiosRequestConfig } from 'axios'
 
+const URL_HOST = import.meta.env.VITE_API_HOST
 const api = axios.create({
-    baseURL: 'http://localhost:8000/api/v1',
+    baseURL: `${URL_HOST}/api/v1`,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -92,7 +93,7 @@ api.interceptors.response.use(
                         }
                     )
 
-                    const { access, refresh: newRefreshToken } = response.data
+                    const { access, refresh: newRefreshToken } = response.data.data
 
                     // Update tokens in localStorage
                     localStorage.setItem('token', access)

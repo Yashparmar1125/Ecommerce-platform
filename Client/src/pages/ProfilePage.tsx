@@ -58,7 +58,7 @@ const ProfilePage: React.FC = () => {
     try {
       // Load orders
       const ordersResponse = await orderApi.getOrders()
-      const transformedOrders = ordersResponse.data.map((order: any) => ({
+      const transformedOrders = ordersResponse.data.data.map((order: any) => ({
         id: order.id.toString(),
         date: order.created_at,
         items: order.items.map((item: any) => ({
@@ -95,7 +95,7 @@ const ProfilePage: React.FC = () => {
 
       // Load addresses
       const addressesResponse = await addressApi.getAddresses()
-      const transformedAddresses = addressesResponse.data.map((addr: any) => ({
+      const transformedAddresses = addressesResponse.data.data.map((addr: any) => ({
         ...addr,
         zipCode: addr.zip_code || addr.zipCode,
         isDefault: addr.is_default || addr.isDefault

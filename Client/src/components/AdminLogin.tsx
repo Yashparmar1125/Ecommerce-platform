@@ -35,13 +35,13 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
       
       if (response.status === 200) {
         // Store admin tokens separately
-        localStorage.setItem('adminToken', response.data.tokens.access)
-        localStorage.setItem('adminRefreshToken', response.data.tokens.refresh)
+        localStorage.setItem('adminToken', response.data.data.tokens.access)
+        localStorage.setItem('adminRefreshToken', response.data.data.tokens.refresh)
         localStorage.setItem('adminAuthenticated', 'true')
         
         // Set the token for API calls
-        localStorage.setItem('token', response.data.tokens.access)
-        localStorage.setItem('refreshToken', response.data.tokens.refresh)
+        localStorage.setItem('token', response.data.data.tokens.access)
+        localStorage.setItem('refreshToken', response.data.data.tokens.refresh)
         
         onLoginSuccess()
       } else {

@@ -20,7 +20,7 @@ interface BackendProduct {
 
 interface ProductListResponse {
   count: number
-  results: BackendProduct[]
+  data: BackendProduct[]
 }
 
 interface Category {
@@ -32,7 +32,7 @@ interface Category {
 
 interface CategoryListResponse {
   count: number
-  results: Category[]
+  data: Category[]
 }
 
 const transformProduct = (backendProduct: BackendProduct): Product => {
@@ -66,7 +66,7 @@ export const productService = {
   getAllProducts: async (): Promise<Product[]> => {
     try {
       const response = await api.get<ProductListResponse>('/products')
-      return response.data.results.map(transformProduct)
+      return response.data.data.map(transformProduct)
     } catch (error) {
       console.error('Failed to fetch products:', error)
       return []
@@ -75,8 +75,8 @@ export const productService = {
 
   getProductById: async (id: string): Promise<Product | undefined> => {
     try {
-      const response = await api.get<{ product: BackendProduct; skus: any[] }>(`/products/${id}`)
-      return transformProduct(response.data.product)
+      const response = await api.get<{ data: { product: BackendProduct; skus: any[] } }>(`/products/${id}`)
+      return transformProduct(response.data.data.product)
     } catch (error) {
       console.error('Failed to fetch product:', error)
       return undefined
@@ -88,7 +88,7 @@ export const productService = {
       const response = await api.get<ProductListResponse>('/products', {
         params: { featured: 'true' }
       })
-      const products = response.data.results.map(transformProduct)
+      const products = response.data.data.map(transformProduct)
       return limit ? products.slice(0, limit) : products
     } catch (error) {
       console.error('Failed to fetch featured products:', error)
@@ -101,7 +101,7 @@ export const productService = {
       const response = await api.get<ProductListResponse>('/products', {
         params: { category }
       })
-      return response.data.results.map(transformProduct)
+      return response.data.data.map(transformProduct)
     } catch (error) {
       console.error('Failed to fetch products by category:', error)
       return []
@@ -113,7 +113,7 @@ export const productService = {
       const response = await api.get<ProductListResponse>('/products/search', {
         params: { q: query }
       })
-      return response.data.results.map(transformProduct)
+      return response.data.data.map(transformProduct)
     } catch (error) {
       console.error('Failed to search products:', error)
       return []
@@ -123,7 +123,7 @@ export const productService = {
   getCategories: async (): Promise<Category[]> => {
     try {
       const response = await api.get<CategoryListResponse>('/products/categories')
-      return response.data.results
+      return response.data.data
     } catch (error) {
       console.error('Failed to fetch categories:', error)
       return []

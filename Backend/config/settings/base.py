@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # =========================================================
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG", "False") == "True"
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost").split(",")
+
 
 
 # =========================================================
@@ -170,10 +170,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # 🌐 CORS CONFIGURATION
 # =========================================================
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5173",
     "http://localhost:5173",
-    "http://127.0.0.1:63342",
     "http://localhost:63342",
+    "http://localhost:4173",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -185,4 +184,18 @@ CORS_ALLOW_HEADERS = [
     "user-agent",
     "x-csrftoken",
     "x-requested-with",
+
 ]
+
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+]
+
+APPEND_SLASH = True
+
+

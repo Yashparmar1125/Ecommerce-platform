@@ -76,7 +76,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats }) => {
                   <p className="text-xs text-neutral-600">{order.user_email || order.user_name}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-primary">Rs. {order.total?.toFixed(2) || '0.00'}</p>
+                  <p className="text-sm font-medium text-primary">
+                    Rs. {order.total ? (typeof order.total === 'number' ? order.total.toFixed(2) : parseFloat(order.total).toFixed(2)) : '0.00'}
+                  </p>
                   <span className={`text-xs px-2 py-1 ${
                     order.status === 'delivered' ? 'bg-green-100 text-green-700' :
                     order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
