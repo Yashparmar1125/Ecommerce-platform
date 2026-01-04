@@ -42,7 +42,7 @@ class ProductListView(APIView):
         return Response(
             {
                 "count": len(serializer.data),
-                "results": serializer.data
+                "data": serializer.data
             },
             status=status.HTTP_200_OK
         )
@@ -65,8 +65,10 @@ class ProductDetailView(APIView):
         skus_data = ProductSKUSerializer(skus, many=True).data
         
         return Response({
-            "product": product_data,
-            "skus": skus_data
+            "data": {
+                "product": product_data,
+                "skus": skus_data
+            }
         }, status=status.HTTP_200_OK)
 
 
@@ -86,7 +88,8 @@ class ProductDetailedSKUView(APIView):
         skus_data = ProductSKUSerializer(skus, many=True).data
         
         return Response({
-            "skus": skus_data
+            "count": len(skus_data),
+            "data": skus_data
         }, status=status.HTTP_200_OK)
 
 
@@ -102,7 +105,7 @@ class ProductSearchView(APIView):
             return Response(
                 {
                     "count": 0,
-                    "results": [],
+                    "data": [],
                     "message": "Search query is required"
                 },
                 status=status.HTTP_200_OK
@@ -118,7 +121,7 @@ class ProductSearchView(APIView):
             {
                 "query": query,
                 "count": len(serializer.data),
-                "results": serializer.data
+                "data": serializer.data
             },
             status=status.HTTP_200_OK
         )
@@ -139,7 +142,7 @@ class CategoryListView(APIView):
         return Response(
             {
                 "count": len(serializer.data),
-                "results": serializer.data
+                "data": serializer.data
             },
             status=status.HTTP_200_OK
         )

@@ -82,7 +82,7 @@ const AdminOrders: React.FC<AdminOrdersProps> = ({
                     <p className="text-xs text-neutral-500">{order.user_name}</p>
                   )}
                   <p className="text-base font-medium text-primary mt-2">
-                    Rs. {order.total.toFixed(2)}
+                    Rs. {order.total ? (typeof order.total === 'number' ? order.total.toFixed(2) : parseFloat(order.total).toFixed(2)) : '0.00'}
                   </p>
                 </div>
                 <div className="w-40">

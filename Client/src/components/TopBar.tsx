@@ -18,7 +18,7 @@ const TopBar: React.FC = () => {
             </select>
             {user ? (
               <Link to="/profile" className="text-neutral-600 hover:text-primary transition-smooth">
-                {user.name}
+                {user.first_name} {user.last_name}
               </Link>
             ) : (
               <Link to="/login" className="text-neutral-600 hover:text-primary transition-smooth">

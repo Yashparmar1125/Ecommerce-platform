@@ -56,12 +56,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const response = await emailLogin(email, password)
       if (response.status === 200) {
-        localStorage.setItem('token', response.data.tokens.access)
-        localStorage.setItem('refreshToken', response.data.tokens.refresh)
+        localStorage.setItem('token', response.data.data.tokens.access)
+        localStorage.setItem('refreshToken', response.data.data.tokens.refresh)
         const user = await getUser()
         if (user.status === 200) {
-          setUser(user.data)
-          localStorage.setItem('user', JSON.stringify(user.data))
+          setUser(user.data.data)
+          localStorage.setItem('user', JSON.stringify(user.data.data))
         } else {
           return false
         }
@@ -81,10 +81,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const last_name = name.split(' ')[1]
       const response = await registerUser(email, password, first_name, last_name)
       if (response.status === 201) {
-        setUser(response.data.user)
-        localStorage.setItem('user', JSON.stringify(response.data.user))
-        localStorage.setItem('token', response.data.tokens.access)
-        localStorage.setItem('refreshToken', response.data.tokens.refresh)
+        setUser(response.data.data.user)
+        localStorage.setItem('user', JSON.stringify(response.data.data.user))
+        localStorage.setItem('token', response.data.data.tokens.access)
+        localStorage.setItem('refreshToken', response.data.data.tokens.refresh)
         return true
       } else {
         return false

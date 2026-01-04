@@ -64,7 +64,7 @@ const OrderDetailPage: React.FC = () => {
     try {
       setLoading(true)
       const response = await orderApi.getOrder(id!)
-      const orderData = response.data
+      const orderData = response.data.data
 
       // Transform the order data to match our Order interface
       const transformedOrder: Order = {
@@ -410,4 +410,6 @@ const OrderDetailPage: React.FC = () => {
 }
 
 export default OrderDetailPage
+
+
 

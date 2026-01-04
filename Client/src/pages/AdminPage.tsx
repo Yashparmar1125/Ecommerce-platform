@@ -94,7 +94,7 @@ const AdminPage: React.FC = () => {
       const response = await adminApi.getDashboard()
       if (response.status === 200) {
         setIsAdminAuthenticated(true)
-        setStats(response.data)
+        setStats(response.data.data)
         setLoading(false)
       }
     } catch (err: any) {
@@ -141,22 +141,22 @@ const AdminPage: React.FC = () => {
             adminApi.getAttributes('size'),
             adminApi.getAttributes('color'),
           ])
-          setProducts(productsRes.data.results)
-          setCategories(categoriesRes.data.results)
-          setSizeAttributes(sizesRes.data.results.map((attr: any) => ({ id: attr.id, value: attr.value })))
-          setColorAttributes(colorsRes.data.results.map((attr: any) => ({ id: attr.id, value: attr.value })))
+          setProducts(productsRes.data.data)
+          setCategories(categoriesRes.data.data)
+          setSizeAttributes(sizesRes.data.data.map((attr: any) => ({ id: attr.id, value: attr.value })))
+          setColorAttributes(colorsRes.data.data.map((attr: any) => ({ id: attr.id, value: attr.value })))
           break
         case 'orders':
           const ordersRes = await adminApi.getOrders(orderStatusFilter || undefined)
-          setOrders(ordersRes.data.results)
+          setOrders(ordersRes.data.data)
           break
         case 'users':
           const usersRes = await adminApi.getUsers()
-          setUsers(usersRes.data.results)
+          setUsers(usersRes.data.data)
           break
         case 'categories':
           const catsRes = await adminApi.getCategories()
-          setCategories(catsRes.data.results)
+          setCategories(catsRes.data.data)
           break
       }
     } catch (err: any) {

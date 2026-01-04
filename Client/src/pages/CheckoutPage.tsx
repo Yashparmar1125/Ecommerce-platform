@@ -50,7 +50,7 @@ const CheckoutPage: React.FC = () => {
     const loadAddresses = async () => {
       try {
         const response = await addressApi.getAddresses()
-        const loadedAddresses = response.data.map((addr: any) => ({
+        const loadedAddresses = response.data.data.map((addr: any) => ({
           ...addr,
           zipCode: addr.zip_code || addr.zipCode,
           isDefault: addr.is_default || addr.isDefault
@@ -84,7 +84,7 @@ const CheckoutPage: React.FC = () => {
               const skuResponse = await fetch(`http://localhost:8000/api/v1/products/${item.productId}/skus`)
               if (skuResponse.ok) {
                 const data = await skuResponse.json()
-                skuMap[item.productId] = data.skus || []
+                skuMap[item.productId] = data.data || []
               }
             }
           } catch (err) {
@@ -146,7 +146,7 @@ const CheckoutPage: React.FC = () => {
         }
 
         const addressResponse = await addressApi.createAddress(addressData)
-        addressId = addressResponse.data.id
+        addressId = addressResponse.data.data.id
       }
 
       // Prepare order items with SKU IDs or size/color
