@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ecommerce API Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://api.fontshare.com/v2/css?f[]=neue-montreal@400,500,600,700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        border-color: #e0e0e0;
+      }
+
+      body {
+        font-family: "Satoshi", "Inter", system-ui, sans-serif;
+        background-color: #ffffff;
+        color: #0a0a0a;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        letter-spacing: -0.01em;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-family: "Neue Montreal", "Satoshi", system-ui, sans-serif;
+        letter-spacing: -0.02em;
+        font-weight: 500;
+      }
+
+      .code-block {
+        background-color: #ededed;
+        border: 1px solid #e0e0e0;
+        font-family: "Courier New", monospace;
+        font-size: 0.875rem;
+      }
+
+      .endpoint-method {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .method-get {
+        background-color: #0a0a0a;
+        color: #ffffff;
+      }
+      .method-post {
+        background-color: #0a0a0a;
+        color: #ffffff;
+      }
+      .method-patch {
+        background-color: #0a0a0a;
+        color: #ffffff;
+      }
+      .method-put {
+        background-color: #0a0a0a;
+        color: #ffffff;
+      }
+      .method-delete {
+        background-color: #0a0a0a;
+        color: #ffffff;
+      }
+
+      .sidebar-link {
+        transition: all 0.2s;
+      }
+
+      .sidebar-link:hover {
+        background-color: #ededed;
+      }
+
+      .sidebar-link.active {
+        background-color: #0a0a0a;
+        color: #ffffff;
+      }
+
+      .toc-link {
+        color: #666666;
+        transition: color 0.2s;
+      }
+
+      .toc-link:hover {
+        color: #0a0a0a;
+      }
+
+      .toc-link.active {
+        color: #0a0a0a;
+        font-weight: 500;
+      }
+
+      pre {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+
+      .loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 400px;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#0A0A0A",
+              background: "#FFFFFF",
+              soft: "#EDEDED",
+              neutral: {
+                50: "#FAFAFA",
+                100: "#EDEDED",
+                200: "#E0E0E0",
+                300: "#D1D1D1",
+                400: "#B8B8B8",
+                500: "#9E9E9E",
+                600: "#808080",
+                700: "#666666",
+                800: "#4A4A4A",
+                900: "#333333",
+              },
+            },
+            fontFamily: {
+              sans: ["Satoshi", "Inter", "system-ui", "sans-serif"],
+              heading: ["Neue Montreal", "Satoshi", "system-ui", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-background text-primary">
+    <div class="flex h-screen overflow-hidden">
+      <!-- Left Sidebar -->
+      <aside
+        id="sidebar"
+        class="w-64 bg-soft border-r border-neutral-200 flex flex-col overflow-y-auto"
+      >
+        <div class="p-6 border-b border-neutral-200">
+          <h1
+            class="text-lg font-heading font-medium text-primary uppercase tracking-wider"
+          >
+            API Docs
+          </h1>
+        </div>
+        <nav class="flex-1 p-4 space-y-1">
+          <a
+            href="#introduction"
+            class="sidebar-link active block px-4 py-2 text-sm text-primary"
+            onclick="loadSection('introduction', this)"
+          >
+            Introduction
+          </a>
+          <a
+            href="#authentication"
+            class="sidebar-link block px-4 py-2 text-sm text-neutral-600"
+            onclick="loadSection('authentication', this)"
+          >
+            Authentication
+          </a>
+          <a
+            href="#users"
+            class="sidebar-link block px-4 py-2 text-sm text-neutral-600"
+            onclick="loadSection('users', this)"
+          >
+            Users
+          </a>
+          <a
+            href="#products"
+            class="sidebar-link block px-4 py-2 text-sm text-neutral-600"
+            onclick="loadSection('products', this)"
+          >
+            Products
+          </a>
+          <a
+            href="#orders"
+            class="sidebar-link block px-4 py-2 text-sm text-neutral-600"
+            onclick="loadSection('orders', this)"
+          >
+            Orders
+          </a>
+          <a
+            href="#admin"
+            class="sidebar-link block px-4 py-2 text-sm text-neutral-600"
+            onclick="loadSection('admin', this)"
+          >
+            Admin
+          </a>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1 overflow-y-auto">
+        <div class="max-w-4xl mx-auto px-8 py-12">
+          <div id="content-area">
+            <div class="loading">
+              <p class="text-neutral-600">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Right Sidebar - Table of Contents -->
+      <aside
+        id="toc"
+        class="w-64 bg-soft border-l border-neutral-200 p-6 overflow-y-auto hidden lg:block"
+      >
+        <h3
+          class="text-xs font-medium text-primary uppercase tracking-wider mb-4"
+        >
+          On this page
+        </h3>
+        <nav class="space-y-2" id="toc-nav">
+          <!-- Populated by JavaScript -->
+        </nav>
+      </aside>
+    </div>
+
+    <script src="/static/js/api-docs.js"></script>
+  </body>
+</html>

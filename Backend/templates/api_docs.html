@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecommerce API Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=neue-montreal@400,500,600,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            border-color: #E0E0E0;
+        }
+        
+        body {
+            font-family: 'Satoshi', 'Inter', system-ui, sans-serif;
+            background-color: #FFFFFF;
+            color: #0A0A0A;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            letter-spacing: -0.01em;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Neue Montreal', 'Satoshi', system-ui, sans-serif;
+            letter-spacing: -0.02em;
+            font-weight: 500;
+        }
+        
+        .code-block {
+            background-color: #EDEDED;
+            border: 1px solid #E0E0E0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+        
+        .endpoint-method {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .method-get { background-color: #0A0A0A; color: #FFFFFF; }
+        .method-post { background-color: #0A0A0A; color: #FFFFFF; }
+        .method-patch { background-color: #0A0A0A; color: #FFFFFF; }
+        .method-delete { background-color: #0A0A0A; color: #FFFFFF; }
+        
+        .sidebar-link {
+            transition: all 0.2s;
+        }
+        
+        .sidebar-link:hover {
+            background-color: #EDEDED;
+        }
+        
+        .sidebar-link.active {
+            background-color: #0A0A0A;
+            color: #FFFFFF;
+        }
+        
+        .toc-link {
+            color: #666666;
+            transition: color 0.2s;
+        }
+        
+        .toc-link:hover {
+            color: #0A0A0A;
+        }
+        
+        .toc-link.active {
+            color: #0A0A0A;
+            font-weight: 500;
+        }
+        
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0A0A0A',
+                        background: '#FFFFFF',
+                        soft: '#EDEDED',
+                        neutral: {
+                            50: '#FAFAFA',
+                            100: '#EDEDED',
+                            200: '#E0E0E0',
+                            300: '#D1D1D1',
+                            400: '#B8B8B8',
+                            500: '#9E9E9E',
+                            600: '#808080',
+                            700: '#666666',
+                            800: '#4A4A4A',
+                            900: '#333333',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Satoshi', 'Inter', 'system-ui', 'sans-serif'],
+                        heading: ['Neue Montreal', 'Satoshi', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-primary">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Left Sidebar -->
+        <aside id="sidebar" class="w-64 bg-soft border-r border-neutral-200 flex flex-col overflow-y-auto">
+            <div class="p-6 border-b border-neutral-200">
+                <h1 class="text-lg font-heading font-medium text-primary uppercase tracking-wider">API Docs</h1>
+            </div>
+            <nav class="flex-1 p-4 space-y-1">
+                <a href="#introduction" class="sidebar-link active block px-4 py-2 text-sm text-primary" onclick="setActiveSection('introduction', this)">
+                    Introduction
+                </a>
+                <a href="#authentication" class="sidebar-link block px-4 py-2 text-sm text-neutral-600" onclick="setActiveSection('authentication', this)">
+                    Authentication
+                </a>
+                <a href="#users" class="sidebar-link block px-4 py-2 text-sm text-neutral-600" onclick="setActiveSection('users', this)">
+                    Users
+                </a>
+                <a href="#products" class="sidebar-link block px-4 py-2 text-sm text-neutral-600" onclick="setActiveSection('products', this)">
+                    Products
+                </a>
+                <a href="#orders" class="sidebar-link block px-4 py-2 text-sm text-neutral-600" onclick="setActiveSection('orders', this)">
+                    Orders
+                </a>
+                <a href="#admin" class="sidebar-link block px-4 py-2 text-sm text-neutral-600" onclick="setActiveSection('admin', this)">
+                    Admin
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <div class="max-w-4xl mx-auto px-8 py-12">
+                <!-- Introduction Section -->
+                <section id="introduction" class="mb-16">
+                    <nav class="text-sm text-neutral-600 mb-6">
+                        <span>Home</span> <span class="mx-2">></span> <span class="text-primary">Introduction</span>
+                    </nav>
+                    <h1 class="text-4xl font-heading font-medium text-primary mb-6">Introduction</h1>
+                    <p class="text-base text-neutral-700 mb-8 leading-relaxed">
+                        Ecommerce API provides RESTful endpoints for managing products, orders, users, and administrative functions. 
+                        These APIs enable businesses to build e-commerce applications with features like product catalog management, 
+                        order processing, user authentication, and administrative controls.
+                    </p>
+
+                    <h2 class="text-2xl font-heading font-medium text-primary mb-6 mt-12">Base URL</h2>
+                    <div class="code-block p-4 mb-6">
+                        <code>http://localhost:8000/api/v1</code>
+                    </div>
+
+                    <h2 class="text-2xl font-heading font-medium text-primary mb-6 mt-12">Response Format</h2>
+                    <p class="text-base text-neutral-700 mb-4">All successful responses follow a consistent structure:</p>
+                    
+                    <h3 class="text-lg font-heading font-medium text-primary mb-4 mt-8">List Endpoints</h3>
+                    <div class="code-block p-4 mb-6">
+                        <pre>{
+  "count": number,
+  "data": array
+}</pre>
+                    </div>
+
+                    <h3 class="text-lg font-heading font-medium text-primary mb-4 mt-8">Detail Endpoints</h3>
+                    <div class="code-block p-4 mb-6">
+                        <pre>{
+  "data": object
+}</pre>
+                    </div>
+
+                    <h3 class="text-lg font-heading font-medium text-primary mb-4 mt-8">Error Responses</h3>
+                    <div class="code-block p-4 mb-6">
+                        <pre>{
+  "error": "string",
+  "detail": "string"
+}</pre>
+                    </div>
+
+                    <h2 class="text-2xl font-heading font-medium text-primary mb-6 mt-12">Authentication</h2>
+                    <p class="text-base text-neutral-700 mb-4">
+                        Most endpoints require authentication using JWT (JSON Web Tokens). Include the token in the Authorization header:
+                    </p>
+                    <div class="code-block p-4 mb-6">
+                        <pre>Authorization: Bearer &lt;your_access_token&gt;</pre>
+                    </div>
+                </section>
+
+                <!-- Authentication Section -->
+                <section id="authentication" class="mb-16 hidden">
+                    <h1 class="text-4xl font-heading font-medium text-primary mb-8">Authentication</h1>
+                    
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-post">POST</span>
+                            <code class="text-base font-mono">/api/v1/users/register/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Register a new user account.</p>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Request Body</h4>
+                        <div class="code-block p-4 mb-4">
+                            <pre>{
+  "email": "user@example.com",
+  "password": "password123",
+  "first_name": "John",
+  "last_name": "Doe",
+  "phone_number": "+1234567890"
+}</pre>
+                        </div>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Response</h4>
+                        <div class="code-block p-4">
+                            <pre>{
+  "data": {
+    "user": { ... },
+    "tokens": {
+      "access": "...",
+      "refresh": "..."
+    }
+  },
+  "message": "User registered successfully"
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-post">POST</span>
+                            <code class="text-base font-mono">/api/v1/users/login/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Login with email and password.</p>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Request Body</h4>
+                        <div class="code-block p-4 mb-4">
+                            <pre>{
+  "email": "user@example.com",
+  "password": "password123"
+}</pre>
+                        </div>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Response</h4>
+                        <div class="code-block p-4">
+                            <pre>{
+  "data": {
+    "tokens": {
+      "access": "...",
+      "refresh": "..."
+    }
+  },
+  "message": "Login successful"
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-post">POST</span>
+                            <code class="text-base font-mono">/api/v1/users/token/refresh/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Refresh access token using refresh token.</p>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Request Body</h4>
+                        <div class="code-block p-4 mb-4">
+                            <pre>{
+  "refresh": "your_refresh_token"
+}</pre>
+                        </div>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Response</h4>
+                        <div class="code-block p-4">
+                            <pre>{
+  "data": {
+    "access": "new_access_token",
+    "refresh": "new_refresh_token"
+  }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-post">POST</span>
+                            <code class="text-base font-mono">/api/v1/users/logout/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Logout and invalidate refresh token.</p>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Request Body</h4>
+                        <div class="code-block p-4 mb-4">
+                            <pre>{
+  "refresh": "your_refresh_token"
+}</pre>
+                        </div>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Response</h4>
+                        <div class="code-block p-4">
+                            <pre>{
+  "message": "Logged out successfully"
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Users Section -->
+                <section id="users" class="mb-16 hidden">
+                    <h1 class="text-4xl font-heading font-medium text-primary mb-8">Users</h1>
+                    
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/users/me/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get current user profile. Requires authentication.</p>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Response</h4>
+                        <div class="code-block p-4">
+                            <pre>{
+  "data": {
+    "id": 1,
+    "username": "user",
+    "email": "user@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone_number": "+1234567890"
+  }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-patch">PATCH</span>
+                            <code class="text-base font-mono">/api/v1/users/me/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Update current user profile. Requires authentication.</p>
+                    </div>
+
+                    <h2 class="text-2xl font-heading font-medium text-primary mb-6 mt-12">Addresses</h2>
+                    
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/users/addresses/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get all addresses for current user. Requires authentication.</p>
+                    </div>
+
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-post">POST</span>
+                            <code class="text-base font-mono">/api/v1/users/addresses/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Create a new address. Requires authentication.</p>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Request Body</h4>
+                        <div class="code-block p-4">
+                            <pre>{
+  "name": "Home",
+  "street": "123 Main St",
+  "city": "New York",
+  "state": "NY",
+  "zip_code": "10001",
+  "phone": "+1234567890",
+  "is_default": true
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/users/addresses/&lt;id&gt;/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get a specific address. Requires authentication.</p>
+                    </div>
+
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-patch">PATCH</span>
+                            <code class="text-base font-mono">/api/v1/users/addresses/&lt;id&gt;/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Update an address. Requires authentication.</p>
+                    </div>
+
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-delete">DELETE</span>
+                            <code class="text-base font-mono">/api/v1/users/addresses/&lt;id&gt;/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Delete an address. Requires authentication.</p>
+                    </div>
+                </section>
+
+                <!-- Products Section -->
+                <section id="products" class="mb-16 hidden">
+                    <h1 class="text-4xl font-heading font-medium text-primary mb-8">Products</h1>
+                    
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/products/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get all products. Public endpoint.</p>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Query Parameters</h4>
+                        <ul class="list-disc list-inside text-sm text-neutral-600 mb-4 space-y-1">
+                            <li><code>featured</code> - Filter featured products (true/false)</li>
+                            <li><code>category</code> - Filter by category name</li>
+                        </ul>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Response</h4>
+                        <div class="code-block p-4">
+                            <pre>{
+  "count": 10,
+  "data": [
+    {
+      "id": 1,
+      "name": "Product Name",
+      "description": "...",
+      "price": 99.99,
+      "category": "Category",
+      ...
+    }
+  ]
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/products/&lt;id&gt;/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get product details with SKUs. Public endpoint.</p>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Response</h4>
+                        <div class="code-block p-4">
+                            <pre>{
+  "data": {
+    "product": { ... },
+    "skus": [ ... ]
+  }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/products/&lt;id&gt;/skus/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get all SKUs for a product. Public endpoint.</p>
+                    </div>
+
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/products/search/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Search products. Public endpoint.</p>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Query Parameters</h4>
+                        <ul class="list-disc list-inside text-sm text-neutral-600 mb-4 space-y-1">
+                            <li><code>q</code> - Search query string</li>
+                        </ul>
+                    </div>
+
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/products/categories/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get all categories. Public endpoint.</p>
+                    </div>
+                </section>
+
+                <!-- Orders Section -->
+                <section id="orders" class="mb-16 hidden">
+                    <h1 class="text-4xl font-heading font-medium text-primary mb-8">Orders</h1>
+                    
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/orders/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get all orders for current user. Requires authentication.</p>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Response</h4>
+                        <div class="code-block p-4">
+                            <pre>{
+  "count": 5,
+  "data": [
+    {
+      "id": 1,
+      "total": 199.98,
+      "status": "pending",
+      "items": [ ... ],
+      "address_details": { ... },
+      "created_at": "2024-01-01T00:00:00Z"
+    }
+  ]
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-post">POST</span>
+                            <code class="text-base font-mono">/api/v1/orders/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Create a new order. Requires authentication.</p>
+                        <h4 class="text-sm font-medium text-primary uppercase tracking-wider mb-2">Request Body</h4>
+                        <div class="code-block p-4">
+                            <pre>{
+  "address_id": 1,
+  "items": [
+    {
+      "product_id": 1,
+      "sku_id": 1,
+      "quantity": 2
+    },
+    {
+      "product_id": 2,
+      "size": "M",
+      "color": "Black",
+      "quantity": 1
+    }
+  ]
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/orders/&lt;id&gt;/</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get order details. Requires authentication.</p>
+                    </div>
+                </section>
+
+                <!-- Admin Section -->
+                <section id="admin" class="mb-16 hidden">
+                    <h1 class="text-4xl font-heading font-medium text-primary mb-8">Admin</h1>
+                    <p class="text-base text-neutral-600 mb-8">All admin endpoints require admin authentication.</p>
+                    
+                    <h2 class="text-2xl font-heading font-medium text-primary mb-6 mt-12">Authentication</h2>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-post">POST</span>
+                            <code class="text-base font-mono">/api/v1/admin/login</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Admin login. Requires superuser credentials.</p>
+                    </div>
+
+                    <h2 class="text-2xl font-heading font-medium text-primary mb-6 mt-12">Dashboard</h2>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/admin/dashboard</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get dashboard statistics.</p>
+                    </div>
+
+                    <h2 class="text-2xl font-heading font-medium text-primary mb-6 mt-12">Products</h2>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/admin/products</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get all products.</p>
+                    </div>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-post">POST</span>
+                            <code class="text-base font-mono">/api/v1/admin/products</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Create a new product.</p>
+                    </div>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/admin/products/&lt;id&gt;</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get product details.</p>
+                    </div>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-put">PUT</span>
+                            <code class="text-base font-mono">/api/v1/admin/products/&lt;id&gt;</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Update a product.</p>
+                    </div>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-delete">DELETE</span>
+                            <code class="text-base font-mono">/api/v1/admin/products/&lt;id&gt;</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Delete a product.</p>
+                    </div>
+
+                    <h2 class="text-2xl font-heading font-medium text-primary mb-6 mt-12">Categories</h2>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/admin/categories</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get all categories.</p>
+                    </div>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-post">POST</span>
+                            <code class="text-base font-mono">/api/v1/admin/categories</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Create a new category.</p>
+                    </div>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/admin/categories/&lt;id&gt;</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get category details.</p>
+                    </div>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-put">PUT</span>
+                            <code class="text-base font-mono">/api/v1/admin/categories/&lt;id&gt;</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Update a category.</p>
+                    </div>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-delete">DELETE</span>
+                            <code class="text-base font-mono">/api/v1/admin/categories/&lt;id&gt;</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Delete a category.</p>
+                    </div>
+
+                    <h2 class="text-2xl font-heading font-medium text-primary mb-6 mt-12">Orders</h2>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/admin/orders</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get all orders. Query parameter: <code>status</code></p>
+                    </div>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/admin/orders/&lt;id&gt;</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get order details.</p>
+                    </div>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-patch">PATCH</span>
+                            <code class="text-base font-mono">/api/v1/admin/orders/&lt;id&gt;</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Update order status.</p>
+                    </div>
+
+                    <h2 class="text-2xl font-heading font-medium text-primary mb-6 mt-12">Users</h2>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/admin/users</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get all users.</p>
+                    </div>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-get">GET</span>
+                            <code class="text-base font-mono">/api/v1/admin/users/&lt;id&gt;</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Get user details.</p>
+                    </div>
+                    <div class="mb-12">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="endpoint-method method-patch">PATCH</span>
+                            <code class="text-base font-mono">/api/v1/admin/users/&lt;id&gt;</code>
+                        </div>
+                        <p class="text-sm text-neutral-600 mb-4">Update user status.</p>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Right Sidebar - Table of Contents -->
+        <aside id="toc" class="w-64 bg-soft border-l border-neutral-200 p-6 overflow-y-auto hidden lg:block">
+            <h3 class="text-xs font-medium text-primary uppercase tracking-wider mb-4">On this page</h3>
+            <nav class="space-y-2" id="toc-nav">
+                <!-- Populated by JavaScript -->
+            </nav>
+        </aside>
+    </div>
+
+    <script>
+        function setActiveSection(sectionId, linkElement) {
+            // Hide all sections
+            document.querySelectorAll('section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            // Update sidebar links
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+                link.classList.add('text-neutral-600');
+                link.classList.remove('text-primary');
+            });
+            
+            linkElement.classList.add('active');
+            linkElement.classList.remove('text-neutral-600');
+            linkElement.classList.add('text-primary');
+            
+            // Update TOC
+            updateTOC(sectionId);
+        }
+
+        function updateTOC(sectionId) {
+            const tocNav = document.getElementById('toc-nav');
+            const section = document.getElementById(sectionId);
+            
+            if (!section) return;
+            
+            const headings = section.querySelectorAll('h2, h3');
+            tocNav.innerHTML = '';
+            
+            headings.forEach(heading => {
+                const id = heading.id || heading.textContent.toLowerCase().replace(/\s+/g, '-');
+                heading.id = id;
+                
+                const link = document.createElement('a');
+                link.href = `#${id}`;
+                link.textContent = heading.textContent;
+                link.className = heading.tagName === 'H2' 
+                    ? 'toc-link block text-sm mb-2' 
+                    : 'toc-link block text-sm ml-4 mb-1';
+                
+                link.onclick = (e) => {
+                    e.preventDefault();
+                    heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                };
+                
+                tocNav.appendChild(link);
+            });
+        }
+
+        // Initialize
+        updateTOC('introduction');
+    </script>
+</body>
+</html>
+
