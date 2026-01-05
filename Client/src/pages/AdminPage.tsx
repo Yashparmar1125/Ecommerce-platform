@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { adminApi } from '../api/axios.api'
+import { getErrorMessage } from '../utils/errorHandler'
 import Button from '../components/Button'
 import AdminLogin from '../components/AdminLogin'
 import AdminDashboard from '../components/admin/AdminDashboard'
@@ -10,9 +11,11 @@ import AdminProducts from '../components/admin/AdminProducts'
 import AdminOrders from '../components/admin/AdminOrders'
 import AdminUsers from '../components/admin/AdminUsers'
 import AdminCategories from '../components/admin/AdminCategories'
+import AdminCoupons from '../components/admin/AdminCoupons'
 import ProductFormModal from '../components/admin/ProductFormModal'
 import CategoryFormModal from '../components/admin/CategoryFormModal'
-import type { DashboardStats, Product, Category, Order, User, TabType } from '../types/admin'
+import CouponFormModal from '../components/admin/CouponFormModal'
+import type { DashboardStats, Product, Category, Order, User, Coupon, TabType } from '../types/admin'
 
 const AdminPage: React.FC = () => {
   const navigate = useNavigate()
@@ -66,6 +69,23 @@ const AdminPage: React.FC = () => {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [categoryForm, setCategoryForm] = useState({ name: '', description: '' })
 
+  // Coupons
+  const [coupons, setCoupons] = useState<Coupon[]>([])
+  const [showCouponModal, setShowCouponModal] = useState(false)
+  const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null)
+  const [couponForm, setCouponForm] = useState({
+    code: '',
+    description: '',
+    discount_type: 'percentage' as 'percentage' | 'fixed',
+    discount_value: '',
+    min_purchase_amount: '',
+    max_discount_amount: '',
+    is_active: true,
+    valid_from: '',
+    valid_until: '',
+    usage_limit: '',
+  })
+
   useEffect(() => {
     checkAdminAccess()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -94,7 +114,9 @@ const AdminPage: React.FC = () => {
       const response = await adminApi.getDashboard()
       if (response.status === 200) {
         setIsAdminAuthenticated(true)
-        setStats(response.data.data)
+        const statsData = response.data.data
+        console.log('Dashboard stats loaded:', statsData)
+        setStats(statsData)
         setLoading(false)
       }
     } catch (err: any) {
@@ -132,7 +154,9 @@ const AdminPage: React.FC = () => {
       switch (activeTab) {
         case 'dashboard':
           const dashboardRes = await adminApi.getDashboard()
-          setStats(dashboardRes.data)
+          const dashboardStats = dashboardRes.data.data
+          console.log('Dashboard stats from loadData:', dashboardStats)
+          setStats(dashboardStats)
           break
         case 'products':
           const [productsRes, categoriesRes, sizesRes, colorsRes] = await Promise.all([
@@ -158,9 +182,13 @@ const AdminPage: React.FC = () => {
           const catsRes = await adminApi.getCategories()
           setCategories(catsRes.data.data)
           break
+        case 'coupons':
+          const couponsRes = await adminApi.getCoupons()
+          setCoupons(couponsRes.data.data)
+          break
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load data')
+      setError(getErrorMessage(err, 'Failed to load data'))
     } finally {
       setLoading(false)
     }
@@ -194,7 +222,7 @@ const AdminPage: React.FC = () => {
       resetProductForm()
       loadData()
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create product')
+      setError(getErrorMessage(err, 'Failed to create product'))
     }
   }
 
@@ -229,7 +257,7 @@ const AdminPage: React.FC = () => {
       resetProductForm()
       loadData()
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update product')
+      setError(getErrorMessage(err, 'Failed to update product'))
     }
   }
 
@@ -240,7 +268,7 @@ const AdminPage: React.FC = () => {
       await adminApi.deleteProduct(id.toString())
       loadData()
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to delete product')
+      setError(getErrorMessage(err, 'Failed to delete product'))
     }
   }
 
@@ -249,7 +277,7 @@ const AdminPage: React.FC = () => {
       await adminApi.updateOrderStatus(orderId.toString(), status)
       loadData()
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update order status')
+      setError(getErrorMessage(err, 'Failed to update order status'))
     }
   }
 
@@ -260,7 +288,7 @@ const AdminPage: React.FC = () => {
       setCategoryForm({ name: '', description: '' })
       loadData()
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create category')
+      setError(getErrorMessage(err, 'Failed to create category'))
     }
   }
 
@@ -274,7 +302,7 @@ const AdminPage: React.FC = () => {
       setCategoryForm({ name: '', description: '' })
       loadData()
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update category')
+      setError(getErrorMessage(err, 'Failed to update category'))
     }
   }
 
@@ -285,8 +313,95 @@ const AdminPage: React.FC = () => {
       await adminApi.deleteCategory(id.toString())
       loadData()
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to delete category')
+      setError(getErrorMessage(err, 'Failed to delete category'))
     }
+  }
+
+  const handleCreateCoupon = async () => {
+    try {
+      const couponData = {
+        ...couponForm,
+        discount_value: parseFloat(couponForm.discount_value),
+        min_purchase_amount: parseFloat(couponForm.min_purchase_amount),
+        max_discount_amount: couponForm.max_discount_amount ? parseFloat(couponForm.max_discount_amount) : null,
+        usage_limit: couponForm.usage_limit ? parseInt(couponForm.usage_limit) : null,
+        valid_from: new Date(couponForm.valid_from).toISOString(),
+        valid_until: new Date(couponForm.valid_until).toISOString(),
+      }
+      await adminApi.createCoupon(couponData)
+      setShowCouponModal(false)
+      resetCouponForm()
+      loadData()
+    } catch (err: any) {
+      setError(getErrorMessage(err, 'Failed to create coupon'))
+    }
+  }
+
+  const handleUpdateCoupon = async () => {
+    if (!editingCoupon) return
+    
+    try {
+      const couponData = {
+        ...couponForm,
+        discount_value: parseFloat(couponForm.discount_value),
+        min_purchase_amount: parseFloat(couponForm.min_purchase_amount),
+        max_discount_amount: couponForm.max_discount_amount ? parseFloat(couponForm.max_discount_amount) : null,
+        usage_limit: couponForm.usage_limit ? parseInt(couponForm.usage_limit) : null,
+        valid_from: new Date(couponForm.valid_from).toISOString(),
+        valid_until: new Date(couponForm.valid_until).toISOString(),
+      }
+      await adminApi.updateCoupon(editingCoupon.id.toString(), couponData)
+      setShowCouponModal(false)
+      setEditingCoupon(null)
+      resetCouponForm()
+      loadData()
+    } catch (err: any) {
+      setError(getErrorMessage(err, 'Failed to update coupon'))
+    }
+  }
+
+  const handleDeleteCoupon = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this coupon?')) return
+    
+    try {
+      await adminApi.deleteCoupon(id.toString())
+      loadData()
+    } catch (err: any) {
+      setError(getErrorMessage(err, 'Failed to delete coupon'))
+    }
+  }
+
+  const resetCouponForm = () => {
+    setCouponForm({
+      code: '',
+      description: '',
+      discount_type: 'percentage',
+      discount_value: '',
+      min_purchase_amount: '',
+      max_discount_amount: '',
+      is_active: true,
+      valid_from: '',
+      valid_until: '',
+      usage_limit: '',
+    })
+    setEditingCoupon(null)
+  }
+
+  const openEditCoupon = (coupon: Coupon) => {
+    setEditingCoupon(coupon)
+    setCouponForm({
+      code: coupon.code,
+      description: coupon.description || '',
+      discount_type: coupon.discount_type,
+      discount_value: coupon.discount_value.toString(),
+      min_purchase_amount: coupon.min_purchase_amount.toString(),
+      max_discount_amount: coupon.max_discount_amount?.toString() || '',
+      is_active: coupon.is_active,
+      valid_from: new Date(coupon.valid_from).toISOString().split('T')[0],
+      valid_until: new Date(coupon.valid_until).toISOString().split('T')[0],
+      usage_limit: coupon.usage_limit?.toString() || '',
+    })
+    setShowCouponModal(true)
   }
 
   const resetProductForm = () => {
@@ -369,6 +484,7 @@ const AdminPage: React.FC = () => {
     { key: 'orders', label: 'Orders', icon: '🛒' },
     { key: 'users', label: 'Users', icon: '👥' },
     { key: 'categories', label: 'Categories', icon: '📁' },
+    { key: 'coupons', label: 'Coupons', icon: '🎫' },
   ]
 
   if (checkingAuth) {
@@ -470,8 +586,15 @@ const AdminPage: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {activeTab === 'dashboard' && stats && (
-            <AdminDashboard stats={stats} />
+          {activeTab === 'dashboard' && (
+            stats ? (
+              <AdminDashboard stats={stats} />
+            ) : (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-primary">Loading dashboard...</p>
+              </div>
+            )
           )}
 
           {activeTab === 'products' && (
@@ -504,6 +627,15 @@ const AdminPage: React.FC = () => {
               onCreate={() => { setEditingCategory(null); setCategoryForm({ name: '', description: '' }); setShowCategoryModal(true) }}
             />
           )}
+
+          {activeTab === 'coupons' && (
+            <AdminCoupons
+              coupons={coupons}
+              onEdit={openEditCoupon}
+              onDelete={handleDeleteCoupon}
+              onCreate={() => { resetCouponForm(); setShowCouponModal(true) }}
+            />
+          )}
         </motion.div>
       </div>
 
@@ -526,10 +658,19 @@ const AdminPage: React.FC = () => {
       <CategoryFormModal
         isOpen={showCategoryModal}
         onClose={() => { setShowCategoryModal(false); setEditingCategory(null); setCategoryForm({ name: '', description: '' }) }}
-        onSubmit={editingCategory ? handleUpdateCategory : handleCreateCategory}
         categoryForm={categoryForm}
         setCategoryForm={setCategoryForm}
+        onSubmit={editingCategory ? handleUpdateCategory : handleCreateCategory}
         isEditing={!!editingCategory}
+      />
+
+      <CouponFormModal
+        isOpen={showCouponModal}
+        onClose={() => { setShowCouponModal(false); resetCouponForm() }}
+        formData={couponForm}
+        onChange={setCouponForm}
+        onSubmit={editingCoupon ? handleUpdateCoupon : handleCreateCoupon}
+        editing={editingCoupon}
       />
     </div>
   )

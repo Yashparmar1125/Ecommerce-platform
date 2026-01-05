@@ -7,6 +7,8 @@ from .views import (
     AdminCategoryListView, AdminCategoryDetailView,
     AdminOrderListView, AdminOrderDetailView,
     AdminUserListView, AdminUserDetailView,
+    AdminReviewListView, AdminReviewDetailView,
+    AdminCouponListView, AdminCouponDetailView, AdminCouponUsageListView,
 )
 
 urlpatterns = [
@@ -34,5 +36,14 @@ urlpatterns = [
     # Users
     path('users', AdminUserListView.as_view(), name='admin-users-list'),
     path('users/<int:user_id>', AdminUserDetailView.as_view(), name='admin-user-detail'),
+    
+    # Reviews
+    path('reviews', AdminReviewListView.as_view(), name='admin-reviews-list'),
+    path('reviews/<int:review_id>', AdminReviewDetailView.as_view(), name='admin-review-detail'),
+    
+    # Coupons
+    path('coupons', AdminCouponListView.as_view(), name='admin-coupons-list'),
+    path('coupons/<int:coupon_id>', AdminCouponDetailView.as_view(), name='admin-coupon-detail'),
+    path('coupons/usage', AdminCouponUsageListView.as_view(), name='admin-coupon-usage-list'),
 ]
 

@@ -3,10 +3,22 @@ import { motion } from 'framer-motion'
 import type { DashboardStats } from '../../types/admin'
 
 interface AdminDashboardProps {
-  stats: DashboardStats
+  stats: DashboardStats | null
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats }) => {
+  // Debug: Check if stats is received
+  console.log('AdminDashboard received stats:', stats)
+  
+  if (!stats) {
+    return (
+      <div className="text-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-neutral-600">Loading dashboard data...</p>
+      </div>
+    )
+  }
+
   const statCards = [
     {
       label: 'Total Users',

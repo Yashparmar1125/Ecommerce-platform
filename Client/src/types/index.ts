@@ -10,6 +10,51 @@ export interface Product {
   colors: string[]
   inStock: boolean
   featured?: boolean
+  details?: ProductDetails
+  reviewSummary?: ReviewSummary
+}
+
+export interface ProductDetails {
+  material?: string
+  care_instructions?: string
+  fit?: string
+  brand?: string
+}
+
+export interface ReviewSummary {
+  average_rating: number
+  total_ratings: number
+  total_reviews: number
+  rating_breakdown: Record<number, number>
+}
+
+export interface ProductReview {
+  id: number
+  user_name: string
+  user_email: string
+  rating: number
+  title?: string
+  comment: string
+  is_verified_purchase: boolean
+  helpful_count: number
+  created_at: string
+  updated_at: string
+}
+
+export interface Coupon {
+  id: number
+  code: string
+  description: string
+  discount_type: 'percentage' | 'fixed'
+  discount_value: number
+  min_purchase_amount: number
+  max_discount_amount?: number
+  is_active: boolean
+  valid_from: string
+  valid_until: string
+  usage_limit?: number
+  used_count: number
+  is_valid: boolean
 }
 
 export interface CartItem {

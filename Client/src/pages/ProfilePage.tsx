@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { addressApi, orderApi, userApi } from '../api/axios.api'
+import { getErrorMessage } from '../utils/errorHandler'
 import type { Address, Order } from '../types'
 import Button from '../components/Button'
 import Input from '../components/Input'
@@ -17,6 +18,7 @@ const ProfilePage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([])
   const [addresses, setAddresses] = useState<Address[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState<'orders' | 'addresses' | 'profile'>('orders')
   
   // Address management
@@ -103,6 +105,7 @@ const ProfilePage: React.FC = () => {
       setAddresses(transformedAddresses)
     } catch (error) {
       console.error('Failed to load data:', error)
+      setError(getErrorMessage(error, 'Failed to load your data. Please refresh the page.'))
     } finally {
       setLoading(false)
     }
@@ -128,8 +131,10 @@ const ProfilePage: React.FC = () => {
         is_default: false,
       })
       loadData()
+      setError('')
     } catch (error) {
       console.error('Failed to save address:', error)
+      setError(getErrorMessage(error, 'Failed to save address. Please try again.'))
     }
   }
 
@@ -152,8 +157,10 @@ const ProfilePage: React.FC = () => {
       try {
         await addressApi.deleteAddress(id.toString())
         loadData()
+        setError('')
       } catch (error) {
         console.error('Failed to delete address:', error)
+        setError(getErrorMessage(error, 'Failed to delete address. Please try again.'))
       }
     }
   }
@@ -166,6 +173,7 @@ const ProfilePage: React.FC = () => {
       window.location.reload() // Simple reload to get updated user data
     } catch (error) {
       console.error('Failed to update profile:', error)
+      setError(getErrorMessage(error, 'Failed to update profile. Please try again.'))
     }
   }
 
@@ -173,8 +181,10 @@ const ProfilePage: React.FC = () => {
     try {
       await addressApi.updateAddress(id.toString(), { is_default: true })
       loadData()
+      setError('')
     } catch (error) {
       console.error('Failed to set default address:', error)
+      setError(getErrorMessage(error, 'Failed to set default address. Please try again.'))
     }
   }
 
@@ -210,6 +220,28 @@ const ProfilePage: React.FC = () => {
           Sign Out
         </Button>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <motion.div
+          className="mb-6 bg-soft border border-primary/20 text-primary px-4 py-3 text-sm"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+        >
+          <div className="flex items-center justify-between">
+            <span>{error}</span>
+            <button
+              onClick={() => setError('')}
+              className="text-neutral-600 hover:text-primary transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </motion.div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-4 mb-8 border-b border-soft">

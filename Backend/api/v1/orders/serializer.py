@@ -86,6 +86,16 @@ class OrderCreateSerializer(serializers.Serializer):
     """Serializer for creating an order"""
     address_id = serializers.IntegerField(required=False, allow_null=True)
     items = OrderItemCreateSerializer(many=True)
+    coupon_code = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    
+    def validate_coupon_code(self, value):
+        """Normalize coupon code - convert to None if empty string"""
+        if value and isinstance(value, str):
+            value = value.strip()
+            if not value:
+                return None
+            return value.upper()
+        return value
     
     def validate_items(self, value):
         if not value or len(value) == 0:

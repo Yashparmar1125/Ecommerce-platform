@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
+import { getErrorMessage } from '../utils/errorHandler'
 import Button from '../components/Button'
 import Input from '../components/Input'
 
@@ -49,7 +50,7 @@ const RegisterPage: React.FC = () => {
         setError('Registration failed. Please try again.')
       }
     } catch (err) {
-      setError('An error occurred. Please try again.')
+      setError(getErrorMessage(err, 'Registration failed. Please try again.'))
     } finally {
       setIsLoading(false)
     }

@@ -1,10 +1,11 @@
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, F
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate
-from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.products.models import Product, Category, ProductImage, ProductSKU, ProductAttribute
+from apps.products.models import Product, Category, ProductImage, ProductSKU, ProductAttribute, Coupon, CouponUsage
 from apps.orders.models import Order
 from apps.users.models import User
 
@@ -256,10 +257,72 @@ class AdminOrderService:
         )
     
     @staticmethod
+    @transaction.atomic
     def update_order_status(order, new_status):
-        """Update the status of an order"""
+        """Update the status of an order - handles inventory restoration for cancellations"""
+        from django.db.models import F
+        from apps.products.models import Coupon, CouponUsage
+        
+        old_status = order.status
+        
+        # If cancelling, restore inventory
+        if new_status == Order.CANCELLED and old_status != Order.CANCELLED:
+            # Restore inventory for all order items
+            for item in order.items.all():
+                ProductSKU.objects.filter(id=item.sku.id).update(
+                    quantity=F('quantity') + item.quantity
+                )
+                
+                # Update product in_stock status
+                product = item.product
+                has_stock = ProductSKU.objects.filter(
+                    product=product,
+                    quantity__gt=0
+                ).exists()
+                
+                if product.in_stock != has_stock:
+                    product.in_stock = has_stock
+                    product.save(update_fields=['in_stock'])
+            
+            # Handle coupon usage if order had a coupon
+            coupon_usage = CouponUsage.objects.filter(order=order).first()
+            if coupon_usage:
+                # Atomically decrement coupon used count
+                Coupon.objects.filter(id=coupon_usage.coupon.id).update(
+                    used_count=F('used_count') - 1
+                )
+                # Delete coupon usage record
+                coupon_usage.delete()
+        
+        # If uncancelling (changing from cancelled to another status), deduct inventory again
+        elif old_status == Order.CANCELLED and new_status != Order.CANCELLED:
+            for item in order.items.all():
+                # Lock SKU for update
+                sku = ProductSKU.objects.select_for_update().get(id=item.sku.id)
+                
+                # Check if enough stock is available
+                if sku.quantity < item.quantity:
+                    from rest_framework.exceptions import ValidationError
+                    raise ValidationError(f"Insufficient stock to restore order. Available: {sku.quantity}, Required: {item.quantity}")
+                
+                # Deduct inventory
+                ProductSKU.objects.filter(id=item.sku.id).update(
+                    quantity=F('quantity') - item.quantity
+                )
+                
+                # Update product in_stock status
+                product = item.product
+                has_stock = ProductSKU.objects.filter(
+                    product=product,
+                    quantity__gt=0
+                ).exists()
+                
+                if product.in_stock != has_stock:
+                    product.in_stock = has_stock
+                    product.save(update_fields=['in_stock'])
+        
         order.status = new_status
-        order.save()
+        order.save(update_fields=['status'])
         return order
 
 

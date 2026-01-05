@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { orderApi } from '../api/axios.api'
+import { getErrorMessage } from '../utils/errorHandler'
 import type { Order } from '../types'
 import Button from '../components/Button'
 import { fadeInUp } from '../utils/animations'
@@ -102,7 +103,7 @@ const OrderDetailPage: React.FC = () => {
       }
       setOrder(transformedOrder)
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load order details')
+      setError(getErrorMessage(err, 'Failed to load order details'))
     } finally {
       setLoading(false)
     }
