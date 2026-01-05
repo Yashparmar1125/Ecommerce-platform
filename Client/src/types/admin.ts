@@ -50,5 +50,21 @@ export interface User {
   order_count: number
 }
 
-export type TabType = 'dashboard' | 'products' | 'orders' | 'users' | 'categories'
+export interface Coupon {
+  id: number
+  code: string
+  description: string
+  discount_type: 'percentage' | 'fixed'
+  discount_value: number
+  min_purchase_amount: number
+  max_discount_amount?: number
+  is_active: boolean
+  valid_from: string
+  valid_until: string
+  usage_limit?: number
+  used_count: number
+  is_valid: boolean
+}
+
+export type TabType = 'dashboard' | 'products' | 'orders' | 'users' | 'categories' | 'coupons'
 

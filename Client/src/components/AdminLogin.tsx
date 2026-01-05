@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { adminApi } from '../api/axios.api'
+import { getErrorMessage } from '../utils/errorHandler'
 import Button from './Button'
 import Input from './Input'
 
@@ -48,14 +49,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
         setError('Invalid username or password')
       }
     } catch (err: any) {
-      if (err.response?.status === 401 || err.response?.status === 403) {
-        const errorMessage = err.response?.data?.detail || err.response?.data?.message || 'Invalid username or password'
-        setError(errorMessage)
-      } else if (err.response?.data?.detail) {
-        setError(err.response.data.detail)
-      } else {
-        setError('An error occurred. Please try again.')
-      }
+      setError(getErrorMessage(err, 'Invalid username or password'))
     } finally {
       setIsLoading(false)
     }

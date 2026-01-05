@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import ValidationError
 from .serializer import OrderSerializer, OrderCreateSerializer
 from .services import OrderService
 
@@ -24,6 +25,11 @@ class OrderListView(APIView):
         serializer = OrderCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
+        # Debug: Log the validated data
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Creating order with data: {serializer.validated_data}")
+        
         try:
             order = OrderService.create_order(request.user, serializer.validated_data)
             serializer = OrderSerializer(order)
@@ -31,7 +37,11 @@ class OrderListView(APIView):
                 "data": serializer.data,
                 "message": "Order created successfully"
             }, status=status.HTTP_201_CREATED)
+        except ValidationError as e:
+            # Re-raise ValidationError to get proper error response
+            raise e
         except Exception as e:
+            logger.error(f"Error creating order: {str(e)}", exc_info=True)
             return Response({
                 'error': 'Failed to create order',
                 'detail': str(e)

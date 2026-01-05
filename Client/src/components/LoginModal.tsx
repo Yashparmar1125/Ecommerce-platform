@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
+import { getErrorMessage } from '../utils/errorHandler'
 import Button from './Button'
 import Input from './Input'
 
@@ -71,7 +72,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         setError('Invalid email or password')
       }
     } catch (err) {
-      setError('An error occurred. Please try again.')
+      setError(getErrorMessage(err, 'Invalid email or password'))
     } finally {
       setIsLoading(false)
     }
@@ -98,7 +99,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         setError('Registration failed. Please try again.')
       }
     } catch (err) {
-      setError('An error occurred. Please try again.')
+      setError(getErrorMessage(err, 'Registration failed. Please try again.'))
     } finally {
       setIsLoading(false)
     }

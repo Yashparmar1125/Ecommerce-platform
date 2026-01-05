@@ -75,8 +75,25 @@ export const productService = {
 
   getProductById: async (id: string): Promise<Product | undefined> => {
     try {
-      const response = await api.get<{ data: { product: BackendProduct; skus: any[] } }>(`/products/${id}`)
-      return transformProduct(response.data.data.product)
+      const response = await api.get<{ 
+        data: { 
+          product: BackendProduct & { details?: any; review_summary?: any }; 
+          skus: any[];
+          recent_reviews?: any[];
+        } 
+      }>(`/products/${id}`)
+      const productData = response.data.data.product
+      const transformed = transformProduct(productData)
+      
+      // Add details and review summary if available
+      if (productData.details) {
+        transformed.details = productData.details
+      }
+      if (productData.review_summary) {
+        transformed.reviewSummary = productData.review_summary
+      }
+      
+      return transformed
     } catch (error) {
       console.error('Failed to fetch product:', error)
       return undefined
@@ -127,6 +144,37 @@ export const productService = {
     } catch (error) {
       console.error('Failed to fetch categories:', error)
       return []
+    }
+  },
+
+  // Reviews
+  getProductReviews: async (productId: string) => {
+    try {
+      const response = await api.get<{ count: number; data: any[] }>(`/products/${productId}/reviews/`)
+      return response.data.data
+    } catch (error) {
+      console.error('Failed to fetch reviews:', error)
+      return []
+    }
+  },
+
+  createReview: async (productId: string, data: { rating: number; title?: string; comment: string }) => {
+    try {
+      const response = await api.post(`/products/${productId}/reviews/create/`, data)
+      return response.data.data
+    } catch (error) {
+      console.error('Failed to create review:', error)
+      throw error
+    }
+  },
+
+  markReviewHelpful: async (reviewId: number) => {
+    try {
+      const response = await api.post(`/products/reviews/${reviewId}/helpful/`)
+      return response.data.data
+    } catch (error) {
+      console.error('Failed to mark review helpful:', error)
+      throw error
     }
   },
 }

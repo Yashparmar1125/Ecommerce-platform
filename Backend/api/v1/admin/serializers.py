@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.products.models import Product, Category, ProductImage, ProductSKU, ProductAttribute
+from apps.products.models import Product, Category, ProductImage, ProductSKU, ProductAttribute, ProductDetail, ProductReview, Coupon, CouponUsage
 from apps.orders.models import Order, OrderItem
 from apps.users.models import User, Address
 from apps.cart.models import Cart, CartItem
@@ -44,20 +44,35 @@ class ProductSKUSerializer(serializers.ModelSerializer):
                   'size_value', 'color_value', 'created_at']
 
 
+class ProductDetailSerializer(serializers.ModelSerializer):
+    """Serializer for product additional details"""
+    class Meta:
+        model = ProductDetail
+        fields = ['id', 'material', 'care_instructions', 'fit', 'brand', 'created_at', 'updated_at']
+
+
 class AdminProductSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
     category_id = serializers.IntegerField(source='category.id', read_only=True)
     images = ProductImageSerializer(many=True, read_only=True)
     skus = ProductSKUSerializer(many=True, read_only=True)
+    details = ProductDetailSerializer(read_only=True)
     
     class Meta:
         model = Product
         fields = ['id', 'name', 'summary', 'description', 'category', 'category_id', 
                   'category_name', 'cover', 'original_price', 'featured', 'in_stock',
-                  'images', 'skus', 'created_at', 'updated_at']
+                  'images', 'skus', 'details', 'created_at', 'updated_at']
         extra_kwargs = {
             'category': {'required': True}
         }
+
+
+class ProductDetailCreateUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for creating/updating product details"""
+    class Meta:
+        model = ProductDetail
+        fields = ['material', 'care_instructions', 'fit', 'brand']
 
 
 class SKUCreateSerializer(serializers.Serializer):
@@ -72,15 +87,17 @@ class SKUCreateSerializer(serializers.Serializer):
 class AdminProductCreateUpdateSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, required=False)
     skus = SKUCreateSerializer(many=True, required=False)
+    details = ProductDetailCreateUpdateSerializer(required=False)
     
     class Meta:
         model = Product
         fields = ['name', 'summary', 'description', 'category', 'cover', 
-                  'original_price', 'featured', 'in_stock', 'images', 'skus']
+                  'original_price', 'featured', 'in_stock', 'images', 'skus', 'details']
     
     def create(self, validated_data):
         images_data = validated_data.pop('images', [])
         skus_data = validated_data.pop('skus', [])
+        details_data = validated_data.pop('details', None)
         product = Product.objects.create(**validated_data)
         
         # Create images
@@ -98,19 +115,13 @@ class AdminProductCreateUpdateSerializer(serializers.ModelSerializer):
             
             if sku_data.get('size_attribute_id'):
                 try:
-                    size_attr = ProductAttribute.objects.get(
-                        id=sku_data['size_attribute_id'],
-                        type=ProductAttribute.SIZE
-                    )
+                    size_attr = ProductAttribute.objects.get(id=sku_data['size_attribute_id'], type='size')
                 except ProductAttribute.DoesNotExist:
                     pass
             
             if sku_data.get('color_attribute_id'):
                 try:
-                    color_attr = ProductAttribute.objects.get(
-                        id=sku_data['color_attribute_id'],
-                        type=ProductAttribute.COLOR
-                    )
+                    color_attr = ProductAttribute.objects.get(id=sku_data['color_attribute_id'], type='color')
                 except ProductAttribute.DoesNotExist:
                     pass
             
@@ -123,20 +134,25 @@ class AdminProductCreateUpdateSerializer(serializers.ModelSerializer):
                 color_attribute=color_attr
             )
         
+        # Create product details if provided
+        if details_data:
+            ProductDetail.objects.create(product=product, **details_data)
+        
         return product
     
     def update(self, instance, validated_data):
         images_data = validated_data.pop('images', None)
         skus_data = validated_data.pop('skus', None)
+        details_data = validated_data.pop('details', None)
         
+        # Update product fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
         
+        # Update images if provided
         if images_data is not None:
-            # Delete existing images
-            instance.images.all().delete()
-            # Create new images
+            ProductImage.objects.filter(product=instance).delete()
             for idx, image_data in enumerate(images_data):
                 ProductImage.objects.create(
                     product=instance,
@@ -144,29 +160,22 @@ class AdminProductCreateUpdateSerializer(serializers.ModelSerializer):
                     order=image_data.get('order', idx)
                 )
         
+        # Update SKUs if provided
         if skus_data is not None:
-            # Delete existing SKUs
-            instance.skus.all().delete()
-            # Create new SKUs
+            ProductSKU.objects.filter(product=instance).delete()
             for sku_data in skus_data:
                 size_attr = None
                 color_attr = None
                 
                 if sku_data.get('size_attribute_id'):
                     try:
-                        size_attr = ProductAttribute.objects.get(
-                            id=sku_data['size_attribute_id'],
-                            type=ProductAttribute.SIZE
-                        )
+                        size_attr = ProductAttribute.objects.get(id=sku_data['size_attribute_id'], type='size')
                     except ProductAttribute.DoesNotExist:
                         pass
                 
                 if sku_data.get('color_attribute_id'):
                     try:
-                        color_attr = ProductAttribute.objects.get(
-                            id=sku_data['color_attribute_id'],
-                            type=ProductAttribute.COLOR
-                        )
+                        color_attr = ProductAttribute.objects.get(id=sku_data['color_attribute_id'], type='color')
                     except ProductAttribute.DoesNotExist:
                         pass
                 
@@ -179,46 +188,98 @@ class AdminProductCreateUpdateSerializer(serializers.ModelSerializer):
                     color_attribute=color_attr
                 )
         
+        # Update product details if provided
+        if details_data:
+            ProductDetail.objects.update_or_create(
+                product=instance,
+                defaults=details_data
+            )
+        
         return instance
+
+
+# Review Serializers
+class AdminProductReviewSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    user_name = serializers.SerializerMethodField()
+    user_email = serializers.EmailField(source='user.email', read_only=True)
+    
+    class Meta:
+        model = ProductReview
+        fields = ['id', 'product', 'product_name', 'user', 'user_name', 'user_email',
+                  'rating', 'title', 'comment', 'is_verified_purchase', 'helpful_count',
+                  'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
+    
+    def get_user_name(self, obj):
+        if obj.user.first_name or obj.user.last_name:
+            return f"{obj.user.first_name} {obj.user.last_name}".strip()
+        return obj.user.username
+
+
+# Coupon Serializers
+class AdminCouponSerializer(serializers.ModelSerializer):
+    is_valid = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Coupon
+        fields = '__all__'
+    
+    def get_is_valid(self, obj):
+        """Check if coupon is currently valid"""
+        try:
+            from django.utils import timezone
+            now = timezone.now()
+            return (
+                obj.is_active and
+                obj.valid_from <= now <= obj.valid_until and
+                (obj.usage_limit is None or obj.used_count < obj.usage_limit)
+            )
+        except:
+            return False
+
+
+class AdminCouponUsageSerializer(serializers.ModelSerializer):
+    coupon_code = serializers.CharField(source='coupon.code', read_only=True)
+    user_name = serializers.SerializerMethodField()
+    user_email = serializers.EmailField(source='user.email', read_only=True)
+    
+    class Meta:
+        model = CouponUsage
+        fields = ['id', 'coupon', 'coupon_code', 'user', 'user_name', 'user_email',
+                  'order', 'discount_amount', 'used_at']
+        read_only_fields = ['used_at']
+    
+    def get_user_name(self, obj):
+        if obj.user.first_name or obj.user.last_name:
+            return f"{obj.user.first_name} {obj.user.last_name}".strip()
+        return obj.user.username
 
 
 # Order Serializers
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
-    product_id = serializers.IntegerField(source='product.id', read_only=True)
     
     class Meta:
         model = OrderItem
-        fields = ['id', 'product', 'product_id', 'product_name', 'sku', 'quantity', 
-                  'price', 'created_at']
+        fields = ['id', 'product', 'product_name', 'quantity', 'price', 'created_at']
 
 
 class AdminOrderSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
     user_name = serializers.SerializerMethodField()
     items = OrderItemSerializer(many=True, read_only=True)
-    address_details = serializers.SerializerMethodField()
     
     class Meta:
         model = Order
         fields = ['id', 'user', 'user_email', 'user_name', 'total', 'status', 
-                  'address', 'address_details', 'items', 'created_at', 'updated_at']
+                  'items', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
     
     def get_user_name(self, obj):
-        return f"{obj.user.first_name} {obj.user.last_name}".strip() or obj.user.username
-    
-    def get_address_details(self, obj):
-        if obj.address:
-            return {
-                'id': obj.address.id,
-                'name': obj.address.name,
-                'street': obj.address.street,
-                'city': obj.address.city,
-                'state': obj.address.state,
-                'zip_code': obj.address.zip_code,
-                'phone': obj.address.phone,
-            }
-        return None
+        if obj.user.first_name or obj.user.last_name:
+            return f"{obj.user.first_name} {obj.user.last_name}".strip()
+        return obj.user.username
 
 
 class OrderStatusUpdateSerializer(serializers.Serializer):

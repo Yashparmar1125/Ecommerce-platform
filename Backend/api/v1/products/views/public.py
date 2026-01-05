@@ -60,14 +60,21 @@ class ProductDetailView(APIView):
         # Get SKUs using service
         skus = ProductServices.get_product_skus(product)
         
+        # Get recent reviews (limit to 5 for detail page)
+        from apps.products.models import ProductReview
+        from api.v1.products.serializer.review import ProductReviewSerializer
+        recent_reviews = ProductReview.objects.filter(product=product).order_by('-helpful_count', '-created_at')[:5]
+        
         # Serialize data
         product_data = ProductSerializer(product).data
         skus_data = ProductSKUSerializer(skus, many=True).data
+        reviews_data = ProductReviewSerializer(recent_reviews, many=True).data
         
         return Response({
             "data": {
                 "product": product_data,
-                "skus": skus_data
+                "skus": skus_data,
+                "recent_reviews": reviews_data
             }
         }, status=status.HTTP_200_OK)
 

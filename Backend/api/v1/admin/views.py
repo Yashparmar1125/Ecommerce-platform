@@ -8,7 +8,8 @@ from .serializers import (
     AdminProductSerializer, AdminProductCreateUpdateSerializer,
     AdminOrderSerializer, OrderStatusUpdateSerializer,
     AdminUserSerializer, CategorySerializer,
-    DashboardStatsSerializer, ProductAttributeSerializer
+    DashboardStatsSerializer, ProductAttributeSerializer,
+    AdminProductReviewSerializer, AdminCouponSerializer, AdminCouponUsageSerializer
 )
 from .permissions import IsAdminUser
 from .services import (
@@ -19,7 +20,7 @@ from .services import (
     AdminOrderService,
     AdminUserService
 )
-from apps.products.models import ProductAttribute
+from apps.products.models import ProductAttribute, ProductReview, Coupon, CouponUsage
 
 
 # ==================== ADMIN AUTHENTICATION ====================
@@ -246,4 +247,112 @@ class AdminUserDetailView(APIView):
         return Response({
             "data": serializer.data,
             "message": "User status updated successfully"
+        }, status=status.HTTP_200_OK)
+
+
+# ==================== REVIEW MANAGEMENT ====================
+
+class AdminReviewListView(APIView):
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        """Get all reviews with optional filters"""
+        product_id = request.query_params.get('product_id')
+        reviews = ProductReview.objects.all().select_related('product', 'user')
+        
+        if product_id:
+            reviews = reviews.filter(product_id=product_id)
+        
+        reviews = reviews.order_by('-created_at')
+        serializer = AdminProductReviewSerializer(reviews, many=True)
+        
+        return Response({
+            'count': len(serializer.data),
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+
+
+class AdminReviewDetailView(APIView):
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request, review_id):
+        review = ProductReview.objects.get(id=review_id)
+        serializer = AdminProductReviewSerializer(review)
+        return Response({"data": serializer.data}, status=status.HTTP_200_OK)
+    
+    def delete(self, request, review_id):
+        review = ProductReview.objects.get(id=review_id)
+        review.delete()
+        return Response({'message': 'Review deleted successfully'}, status=status.HTTP_200_OK)
+
+
+# ==================== COUPON MANAGEMENT ====================
+
+class AdminCouponListView(APIView):
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        """Get all coupons"""
+        coupons = Coupon.objects.all().order_by('-created_at')
+        serializer = AdminCouponSerializer(coupons, many=True)
+        
+        return Response({
+            'count': len(serializer.data),
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        """Create a new coupon"""
+        serializer = AdminCouponSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        coupon = serializer.save()
+        
+        return Response({
+            "data": AdminCouponSerializer(coupon).data,
+            "message": "Coupon created successfully"
+        }, status=status.HTTP_201_CREATED)
+
+
+class AdminCouponDetailView(APIView):
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request, coupon_id):
+        coupon = Coupon.objects.get(id=coupon_id)
+        serializer = AdminCouponSerializer(coupon)
+        return Response({"data": serializer.data}, status=status.HTTP_200_OK)
+    
+    def put(self, request, coupon_id):
+        coupon = Coupon.objects.get(id=coupon_id)
+        serializer = AdminCouponSerializer(coupon, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        coupon = serializer.save()
+        
+        return Response({
+            "data": AdminCouponSerializer(coupon).data,
+            "message": "Coupon updated successfully"
+        }, status=status.HTTP_200_OK)
+    
+    def delete(self, request, coupon_id):
+        coupon = Coupon.objects.get(id=coupon_id)
+        coupon.delete()
+        return Response({'message': 'Coupon deleted successfully'}, status=status.HTTP_200_OK)
+
+
+class AdminCouponUsageListView(APIView):
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        """Get all coupon usages"""
+        coupon_id = request.query_params.get('coupon_id')
+        usages = CouponUsage.objects.all().select_related('coupon', 'user', 'order')
+        
+        if coupon_id:
+            usages = usages.filter(coupon_id=coupon_id)
+        
+        usages = usages.order_by('-used_at')
+        serializer = AdminCouponUsageSerializer(usages, many=True)
+        
+        return Response({
+            'count': len(serializer.data),
+            'data': serializer.data
         }, status=status.HTTP_200_OK)

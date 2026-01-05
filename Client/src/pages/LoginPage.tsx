@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
+import { getErrorMessage } from '../utils/errorHandler'
 import Button from '../components/Button'
 import Input from '../components/Input'
 
@@ -37,7 +38,7 @@ const LoginPage: React.FC = () => {
         setError('Invalid email or password')
       }
     } catch (err) {
-      setError('An error occurred. Please try again.')
+      setError(getErrorMessage(err, 'Invalid email or password'))
     } finally {
       setIsLoading(false)
     }
@@ -55,7 +56,7 @@ const LoginPage: React.FC = () => {
         setError('Google login failed. Please try again.')
       }
     } catch (err) {
-      setError('An error occurred. Please try again.')
+      setError(getErrorMessage(err, 'Google login failed. Please try again.'))
     } finally {
       setIsGoogleLoading(false)
     }

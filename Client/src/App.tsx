@@ -3,6 +3,7 @@ import { AnimatePresence } from 'framer-motion'
 import { CartProvider } from './context/CartContext'
 import { AuthProvider } from './context/AuthContext'
 import { ProductsProvider } from './context/ProductsContext'
+import { CouponProvider } from './context/CouponContext'
 import Layout from './layouts/Layout'
 import PageTransition from './components/PageTransition'
 import ScrollToTop from './components/ScrollToTop'
@@ -26,9 +27,10 @@ function App() {
     <AuthProvider>
       <ProductsProvider>
         <CartProvider>
-          <ScrollToTop />
-          <SessionExpiredModal />
-          <Layout>
+          <CouponProvider>
+            <ScrollToTop />
+            <SessionExpiredModal />
+            <Layout>
             <AnimatePresence mode="wait">
               <Routes location={location} key={location.pathname}>
                 <Route
@@ -122,6 +124,7 @@ function App() {
               </Routes>
             </AnimatePresence>
           </Layout>
+          </CouponProvider>
         </CartProvider>
       </ProductsProvider>
     </AuthProvider>

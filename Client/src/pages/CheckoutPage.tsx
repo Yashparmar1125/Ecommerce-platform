@@ -3,9 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
+import { useCoupon } from '../context/CouponContext'
 import { addressApi, orderApi } from '../api/axios.api'
 import { productService } from '../services/productService'
-import type { Address } from '../types'
+import { couponService } from '../services/couponService'
+import { getErrorMessage } from '../utils/errorHandler'
+import type { Address, Coupon } from '../types'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import { fadeInUp } from '../utils/animations'
@@ -23,6 +26,7 @@ const CheckoutPage: React.FC = () => {
   const navigate = useNavigate()
   const { items, getTotalPrice, clearCart } = useCart()
   const { user } = useAuth()
+  const { selectedCoupon, couponDiscount, setSelectedCoupon, setCouponDiscount, clearCoupon } = useCoupon()
 
   const [addresses, setAddresses] = useState<Address[]>([])
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null)
@@ -44,6 +48,14 @@ const CheckoutPage: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState('cod')
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState('')
+  
+  // Coupons
+  const [coupons, setCoupons] = useState<Coupon[]>([])
+  const [couponCode, setCouponCode] = useState('')
+  const [showCoupons, setShowCoupons] = useState(false)
+  const [loadingCoupons, setLoadingCoupons] = useState(false)
+  const [applyingCoupon, setApplyingCoupon] = useState(false)
+  const [couponError, setCouponError] = useState('')
 
   // Load addresses
   useEffect(() => {
@@ -64,6 +76,7 @@ const CheckoutPage: React.FC = () => {
         }
       } catch (error) {
         console.error('Failed to load addresses:', error)
+        setError(getErrorMessage(error, 'Failed to load addresses. Please refresh the page.'))
       } finally {
         setLoadingAddresses(false)
       }
@@ -89,6 +102,7 @@ const CheckoutPage: React.FC = () => {
             }
           } catch (err) {
             console.error(`Failed to load SKUs for product ${item.productId}:`, err)
+            // Continue with other products even if one fails
           }
         }
         setProductSKUs(skuMap)
@@ -170,17 +184,35 @@ const CheckoutPage: React.FC = () => {
       }
 
       // Create order
-      const orderData = {
+      const orderData: {
+        address_id: number | null
+        items: any[]
+        coupon_code?: string
+      } = {
         address_id: addressId,
         items: orderItems,
       }
 
+      // Include coupon_code if a coupon is selected and has a code
+      if (selectedCoupon && selectedCoupon.code) {
+        orderData.coupon_code = selectedCoupon.code.trim()
+        console.log('✅ Including coupon code in order:', selectedCoupon.code)
+      } else {
+        console.log('❌ No coupon selected')
+      }
+
+      // Debug: Log the complete order data being sent
+      console.log('📦 Order data being sent to backend:', JSON.stringify(orderData, null, 2))
+
       const orderResponse = await orderApi.createOrder(orderData)
+      
+      // Clear coupon after successful order
+      clearCoupon()
       
       clearCart()
       navigate('/profile?order=success')
     } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Failed to place order. Please try again.')
+      setError(getErrorMessage(err, 'Failed to place order. Please try again.'))
       setIsProcessing(false)
     }
   }
@@ -199,13 +231,63 @@ const CheckoutPage: React.FC = () => {
         }
       } catch (error) {
         console.error('Failed to delete address:', error)
+        setError(getErrorMessage(error, 'Failed to delete address. Please try again.'))
       }
     }
   }
 
+  const handleApplyCouponCode = async () => {
+    if (!couponCode.trim()) {
+      setCouponError('Please enter a coupon code')
+      return
+    }
+    
+    const subtotal = getTotalPrice()
+    setCouponError('')
+    setApplyingCoupon(true)
+    try {
+      const result = await couponService.validateCoupon(couponCode.trim(), subtotal)
+      console.log('✅ Coupon code validated successfully:', {
+        coupon: result.coupon,
+        code: result.coupon.code,
+        discount: result.discount_amount,
+      })
+      setSelectedCoupon(result.coupon)
+      setCouponDiscount(result.discount_amount)
+      setCouponCode('')
+    } catch (error: any) {
+      console.error('❌ Failed to validate coupon code:', error)
+      setCouponError(getErrorMessage(error, 'Invalid or expired coupon code'))
+    } finally {
+      setApplyingCoupon(false)
+    }
+  }
+
+  const handleApplyCoupon = async (coupon: Coupon) => {
+    const subtotal = getTotalPrice()
+    setCouponError('')
+    setApplyingCoupon(true)
+    try {
+      const result = await couponService.validateCoupon(coupon.code, subtotal)
+      setSelectedCoupon(result.coupon)
+      setCouponDiscount(result.discount_amount)
+      setCouponCode('')
+    } catch (error: any) {
+      setCouponError(getErrorMessage(error, 'Failed to apply coupon'))
+    } finally {
+      setApplyingCoupon(false)
+    }
+  }
+
+  const handleRemoveCoupon = () => {
+    clearCoupon()
+    setCouponCode('')
+    setCouponError('')
+  }
+
   const subtotal = getTotalPrice()
   const shipping = subtotal >= 50 ? 0 : 5.99
-  const total = subtotal + shipping
+  const total = subtotal + shipping - couponDiscount
 
   if (loadingAddresses || loadingSKUs) {
     return (
@@ -441,21 +523,94 @@ const CheckoutPage: React.FC = () => {
                 ))}
               </div>
 
-              {/* Totals */}
-              <div className="space-y-3 mb-6 border-t border-soft pt-6">
-                <div className="flex justify-between text-sm">
-                  <span className="text-neutral-600">Subtotal</span>
-                  <span className="text-primary font-medium">Rs. {subtotal.toFixed(2)}</span>
+              {/* Detailed Bill Summary */}
+              <div className="space-y-4 mb-6 border-t border-soft pt-6">
+                <h3 className="text-sm font-medium text-primary uppercase tracking-wider mb-4">Bill Summary</h3>
+                
+                {/* Item-wise breakdown */}
+                <div className="space-y-2 text-xs mb-4">
+                  {items.map(item => (
+                    <div key={item.id} className="flex justify-between text-neutral-600">
+                      <span className="truncate flex-1 mr-2">
+                        {item.name} ({item.size}, {item.color}) × {item.quantity}
+                      </span>
+                      <span className="text-primary font-medium whitespace-nowrap">
+                        Rs. {(item.price * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-neutral-600">Shipping</span>
-                  <span className="text-primary font-medium">
-                    {shipping === 0 ? 'Complimentary' : `Rs. ${shipping.toFixed(2)}`}
-                  </span>
+
+                <div className="border-t border-soft pt-3 space-y-2">
+                  {/* Subtotal */}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-neutral-600">Subtotal ({items.length} {items.length === 1 ? 'item' : 'items'})</span>
+                    <span className="text-primary font-medium">Rs. {subtotal.toFixed(2)}</span>
+                  </div>
+
+                  {/* Coupon Discount */}
+                  {selectedCoupon && couponDiscount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span className="flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        Coupon Discount ({selectedCoupon.code})
+                      </span>
+                      <span className="font-medium">-Rs. {couponDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
+
+                  {/* Shipping */}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-neutral-600">Shipping & Handling</span>
+                    <span className="text-primary font-medium">
+                      {shipping === 0 ? (
+                        <span className="text-green-600">Free</span>
+                      ) : (
+                        `Rs. ${shipping.toFixed(2)}`
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Tax (if applicable) */}
+                  <div className="flex justify-between text-xs text-neutral-500">
+                    <span>Taxes & Charges</span>
+                    <span>Included</span>
+                  </div>
                 </div>
-                <div className="flex justify-between pt-4 border-t border-soft">
-                  <span className="font-medium text-primary">Total</span>
-                  <span className="text-lg font-medium text-primary">Rs. {total.toFixed(2)}</span>
+
+                {/* Total */}
+                <div className="flex justify-between pt-4 border-t-2 border-primary">
+                  <span className="font-medium text-primary text-base">Total Amount</span>
+                  <span className="text-xl font-semibold text-primary">Rs. {total.toFixed(2)}</span>
+                </div>
+
+                {/* Savings message */}
+                {selectedCoupon && couponDiscount > 0 && (
+                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <p className="text-sm font-medium text-green-700">
+                        You saved Rs. {couponDiscount.toFixed(2)} with coupon {selectedCoupon.code}
+                      </p>
+                    </div>
+                    {selectedCoupon.description && (
+                      <p className="text-xs text-green-600 mt-1">{selectedCoupon.description}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Payment method info */}
+                <div className="mt-4 p-3 bg-soft rounded-lg">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-neutral-600">Payment Method:</span>
+                    <span className="font-medium text-primary capitalize">
+                      {paymentMethod === 'cod' ? 'Cash on Delivery' : 'Credit/Debit Card'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
