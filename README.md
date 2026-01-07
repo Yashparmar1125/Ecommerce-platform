@@ -26,11 +26,13 @@ The system includes comprehensive modules for user authentication, product manag
 
 * **🔐 Authentication & Users**: Secure JWT Authentication (Access/Refresh tokens) via `simplejwt`.
 * **📦 Product Management**: Full CRUD operations for products, SKUs, and categories.
+* **⭐ Product Reviews & Ratings**: Rich review system with verified purchase badge, helpful votes, and rating breakdowns per product.
+* **🏷️ Coupons & Discounts**: Powerful coupon engine with percentage/fixed discounts, validity windows, usage limits, and per-user tracking.
 * **🛒 Shopping Cart**: Persistent cart management for authenticated and guest users.
 * **❤️ Wishlist**: Functionality for users to save items for later.
 * **💳 Payments & Orders**: Integrated order processing and payment gateways.
-* **🩺 Health Checks**: dedicated endpoints for system status monitoring.
-* **📃 API Documentation**: Auto-generated Swagger/OpenAPI documentation via `drf-spectacular`.
+* **🩺 Health Checks**: Dedicated health endpoint with uptime, DB latency, resource usage, and feature flags.
+* **📃 API Documentation**: Custom, human-friendly API docs UI served from the Django backend.
 
 ### 💻 Frontend (React)
 
@@ -48,7 +50,7 @@ The system includes comprehensive modules for user authentication, product manag
 | **API Toolkit** | DRF 3.16 | Powerful toolkit for Web APIs. |
 | **Authentication** | SimpleJWT | JSON Web Token authentication. |
 | **Database** | SQLite / PostgreSQL | Default SQLite for dev; pluggable for Prod. |
-| **Documentation** | DRF Spectacular | OpenAPI 3.0 schema generation. |
+| **Documentation** | Custom Tailwind Docs | Static API docs UI powered by Django templates. |
 | **Frontend** | React | JavaScript library for building user interfaces. |
 
 ---
@@ -93,8 +95,8 @@ Follow these steps to set up the project locally.
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/ecommerce-platform.git
-cd ecommerce-platform/Backend
+git clone https://github.com/yourusername/Ecommerce-DRF.git
+cd Ecommerce-DRF/Backend
 
 ```
 
@@ -169,16 +171,30 @@ npm run dev
 
 ## 📖 API Documentation
 
-The backend includes auto-generated interactive documentation. Once the server is running, visit:
+The backend ships with a custom, interactive documentation site. Once the server is running, visit:
 
-* **Swagger UI:** `http://localhost:8000/api/schema/swagger-ui/`
-* **Redoc:** `http://localhost:8000/api/schema/redoc/`
+* **API Docs Home:** `http://localhost:8000/`
 
-### Key Endpoints
+You can also inspect and explore the raw JSON responses directly from the API. Some commonly used endpoints:
 
-* `GET /api/v1/health/` - Check system status.
-* `POST /api/v1/users/login/` - Obtain JWT access tokens.
-* `GET /api/v1/products/` - Fetch product catalog.
+### Key Public Endpoints
+
+* `GET /api/v1/health/` – Check system and database status.
+* `POST /api/v1/users/login/` – Obtain JWT access/refresh tokens.
+* `POST /api/v1/users/register/` – Create a new account and receive tokens.
+* `GET /api/v1/products/` – Fetch product catalog with filtering options.
+* `GET /api/v1/products/<product_id>/` – Product detail including SKUs, rich details, and recent reviews.
+* `GET /api/v1/products/<product_id>/reviews/` – List reviews for a product.
+* `POST /api/v1/products/<product_id>/reviews/create/` – Create a review (authenticated).
+* `GET /api/v1/products/coupons/` – List active and valid coupons.
+* `POST /api/v1/products/coupons/validate/` – Validate a coupon and compute discount for a cart/order amount.
+
+### Key Authenticated Endpoints
+
+* `GET /api/v1/users/me/` – Get the current user profile.
+* `GET /api/v1/users/addresses/` – Manage shipping addresses.
+* `GET /api/v1/orders/` – List orders for the current user.
+* `POST /api/v1/orders/` – Create a new order from cart items.
 
 ---
 
