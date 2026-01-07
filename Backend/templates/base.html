@@ -43,6 +43,7 @@
         font-family: "Neue Montreal", "Satoshi", system-ui, sans-serif;
         letter-spacing: -0.02em;
         font-weight: 500;
+        scroll-margin-top: 2rem; /* Smooth scroll offset */
       }
 
       .code-block {
@@ -50,6 +51,32 @@
         border: 1px solid #e0e0e0;
         font-family: "Courier New", monospace;
         font-size: 0.875rem;
+        position: relative; /* For copy button positioning */
+      }
+
+      .copy-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.2s, background-color 0.2s;
+        font-family: "Inter", sans-serif;
+        color: #666;
+      }
+
+      .code-block:hover .copy-btn {
+        opacity: 1;
+      }
+
+      .copy-btn:hover {
+        background-color: #f5f5f5;
+        color: #0a0a0a;
       }
 
       .endpoint-method {
@@ -85,11 +112,9 @@
       .sidebar-link {
         transition: all 0.2s;
       }
-
       .sidebar-link:hover {
         background-color: #ededed;
       }
-
       .sidebar-link.active {
         background-color: #0a0a0a;
         color: #ffffff;
@@ -99,26 +124,39 @@
         color: #666666;
         transition: color 0.2s;
       }
-
       .toc-link:hover {
         color: #0a0a0a;
       }
-
       .toc-link.active {
         color: #0a0a0a;
-        font-weight: 500;
+        font-weight: 600;
+        border-left: 2px solid #0a0a0a;
+        padding-left: 0.5rem;
+        margin-left: -0.5rem;
       }
 
       pre {
         white-space: pre-wrap;
         word-wrap: break-word;
       }
-
       .loading {
         display: flex;
         align-items: center;
         justify-content: center;
         min-height: 400px;
+      }
+
+      /* Search Results Styling */
+      .search-result-item {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      .search-result-item:hover {
+        background-color: #f9f9f9;
+      }
+      .search-highlight {
+        background-color: #ffeeba;
       }
     </style>
     <script>
@@ -151,96 +189,152 @@
       };
     </script>
   </head>
-  <body class="bg-background text-primary">
-    <div class="flex h-screen overflow-hidden">
-      <!-- Left Sidebar -->
-      <aside
-        id="sidebar"
-        class="w-64 bg-soft border-r border-neutral-200 flex flex-col overflow-y-auto"
+  <body
+    class="bg-background text-primary h-screen flex flex-col md:flex-row overflow-hidden"
+  >
+    <header
+      class="md:hidden flex items-center justify-between p-4 border-b border-neutral-200 bg-soft z-20"
+    >
+      <h1
+        class="text-lg font-heading font-medium text-primary uppercase tracking-wider"
       >
-        <div class="p-6 border-b border-neutral-200">
-          <h1
-            class="text-lg font-heading font-medium text-primary uppercase tracking-wider"
+        API Docs
+      </h1>
+      <button id="mobile-menu-btn" class="p-2 text-primary focus:outline-none">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"
+          />
+        </svg>
+      </button>
+    </header>
+
+    <div
+      id="sidebar-backdrop"
+      class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden transition-opacity opacity-0"
+    ></div>
+
+    <aside
+      id="sidebar"
+      class="fixed md:relative inset-y-0 left-0 w-64 bg-soft border-r border-neutral-200 flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out z-30 h-full"
+    >
+      <div class="p-6 border-b border-neutral-200 hidden md:block">
+        <h1
+          class="text-lg font-heading font-medium text-primary uppercase tracking-wider"
+        >
+          API Docs
+        </h1>
+      </div>
+
+      <div class="p-4 border-b border-neutral-200">
+        <div class="relative">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search..."
+            class="w-full px-3 py-2 text-sm border border-neutral-300 rounded bg-white focus:outline-none focus:border-primary transition-colors"
+          />
+          <div
+            class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none"
           >
-            API Docs
-          </h1>
+            <svg
+              class="h-4 w-4 text-neutral-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              ></path>
+            </svg>
+          </div>
         </div>
-        <nav class="flex-1 p-4 space-y-1">
+      </div>
+
+      <div class="flex-1 overflow-y-auto relative">
+        <div
+          id="search-results"
+          class="hidden absolute inset-0 bg-soft z-10 overflow-y-auto"
+        ></div>
+
+        <nav id="main-nav" class="p-4 space-y-1">
           <a
             href="#introduction"
             class="sidebar-link active block px-4 py-2 text-sm text-primary"
             onclick="loadSection('introduction', this)"
+            >Introduction</a
           >
-            Introduction
-          </a>
           <a
             href="#authentication"
             class="sidebar-link block px-4 py-2 text-sm text-neutral-600"
             onclick="loadSection('authentication', this)"
+            >Authentication</a
           >
-            Authentication
-          </a>
           <a
             href="#users"
             class="sidebar-link block px-4 py-2 text-sm text-neutral-600"
             onclick="loadSection('users', this)"
+            >Users</a
           >
-            Users
-          </a>
           <a
             href="#products"
             class="sidebar-link block px-4 py-2 text-sm text-neutral-600"
             onclick="loadSection('products', this)"
+            >Products</a
           >
-            Products
-          </a>
           <a
             href="#orders"
             class="sidebar-link block px-4 py-2 text-sm text-neutral-600"
             onclick="loadSection('orders', this)"
+            >Orders</a
           >
-            Orders
-          </a>
           <a
             href="#admin"
             class="sidebar-link block px-4 py-2 text-sm text-neutral-600"
             onclick="loadSection('admin', this)"
+            >Admin</a
           >
-            Admin
-          </a>
         </nav>
-      </aside>
+      </div>
+    </aside>
 
-      <!-- Main Content -->
-      <main class="flex-1 overflow-y-auto">
-        <div class="max-w-4xl mx-auto px-8 py-12">
-          <div id="content-area">
-            <div class="loading">
-              <p class="text-neutral-600">Loading...</p>
-            </div>
+    <main
+      class="flex-1 overflow-y-auto relative w-full"
+      id="main-scroll-container"
+    >
+      <div class="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12">
+        <div id="content-area">
+          <div class="loading">
+            <p class="text-neutral-600">Loading...</p>
           </div>
         </div>
-      </main>
+      </div>
+    </main>
 
-      <!-- Right Sidebar - Table of Contents -->
-      <aside
-        id="toc"
-        class="w-64 bg-soft border-l border-neutral-200 p-6 overflow-y-auto hidden lg:block"
+    <aside
+      id="toc"
+      class="w-64 bg-soft border-l border-neutral-200 p-6 overflow-y-auto hidden lg:block h-full"
+    >
+      <h3
+        class="text-xs font-medium text-primary uppercase tracking-wider mb-4"
       >
-        <h3
-          class="text-xs font-medium text-primary uppercase tracking-wider mb-4"
-        >
-          On this page
-        </h3>
-        <nav class="space-y-2" id="toc-nav">
-          <!-- Populated by JavaScript -->
-        </nav>
-      </aside>
-    </div>
+        On this page
+      </h3>
+      <nav class="space-y-2" id="toc-nav"></nav>
+    </aside>
 
     <script src="/static/js/api-docs.js"></script>
   </body>
 </html>
-
-
-
