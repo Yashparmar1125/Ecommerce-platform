@@ -7,8 +7,6 @@ interface AdminDashboardProps {
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ stats }) => {
-  // Debug: Check if stats is received
-  console.log('AdminDashboard received stats:', stats)
   
   if (!stats) {
     return (

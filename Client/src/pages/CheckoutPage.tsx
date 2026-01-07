@@ -196,13 +196,10 @@ const CheckoutPage: React.FC = () => {
       // Include coupon_code if a coupon is selected and has a code
       if (selectedCoupon && selectedCoupon.code) {
         orderData.coupon_code = selectedCoupon.code.trim()
-        console.log('✅ Including coupon code in order:', selectedCoupon.code)
-      } else {
-        console.log('❌ No coupon selected')
-      }
+      } 
 
       // Debug: Log the complete order data being sent
-      console.log('📦 Order data being sent to backend:', JSON.stringify(orderData, null, 2))
+      
 
       const orderResponse = await orderApi.createOrder(orderData)
       
@@ -247,16 +244,10 @@ const CheckoutPage: React.FC = () => {
     setApplyingCoupon(true)
     try {
       const result = await couponService.validateCoupon(couponCode.trim(), subtotal)
-      console.log('✅ Coupon code validated successfully:', {
-        coupon: result.coupon,
-        code: result.coupon.code,
-        discount: result.discount_amount,
-      })
       setSelectedCoupon(result.coupon)
       setCouponDiscount(result.discount_amount)
       setCouponCode('')
     } catch (error: any) {
-      console.error('❌ Failed to validate coupon code:', error)
       setCouponError(getErrorMessage(error, 'Invalid or expired coupon code'))
     } finally {
       setApplyingCoupon(false)
