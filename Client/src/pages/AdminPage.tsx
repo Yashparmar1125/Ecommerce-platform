@@ -115,7 +115,6 @@ const AdminPage: React.FC = () => {
       if (response.status === 200) {
         setIsAdminAuthenticated(true)
         const statsData = response.data.data
-        console.log('Dashboard stats loaded:', statsData)
         setStats(statsData)
         setLoading(false)
       }
@@ -155,7 +154,6 @@ const AdminPage: React.FC = () => {
         case 'dashboard':
           const dashboardRes = await adminApi.getDashboard()
           const dashboardStats = dashboardRes.data.data
-          console.log('Dashboard stats from loadData:', dashboardStats)
           setStats(dashboardStats)
           break
         case 'products':

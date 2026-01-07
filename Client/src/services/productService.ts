@@ -1,6 +1,15 @@
 import type { Product } from '../types'
 import { api } from '../api/axios.api'
 
+interface BackendSKU {
+  id: number
+  sku: string
+  color: string
+  size: string
+  price: number | string
+  quantity: number
+}
+
 interface BackendProduct {
   id: number
   name: string
@@ -21,6 +30,11 @@ interface BackendProduct {
 interface ProductListResponse {
   count: number
   data: BackendProduct[]
+}
+
+interface ProductSkuResponse {
+  count: number
+  data: BackendSKU[]
 }
 
 interface Category {
@@ -73,17 +87,40 @@ export const productService = {
     }
   },
 
+  getProductSkus: async (productId: string): Promise<BackendSKU[]> => {
+    const response = await api.get<ProductSkuResponse>(`/products/${productId}/skus/`)
+    return response.data.data
+  },
+
   getProductById: async (id: string): Promise<Product | undefined> => {
     try {
       const response = await api.get<{ 
         data: { 
           product: BackendProduct & { details?: any; review_summary?: any }; 
-          skus: any[];
+          skus: BackendSKU[];
           recent_reviews?: any[];
         } 
       }>(`/products/${id}`)
       const productData = response.data.data.product
       const transformed = transformProduct(productData)
+
+      // Map SKUs with quantity and variant info
+      const skus = (response.data.data.skus || []).map((sku) => ({
+        id: sku.id,
+        sku: sku.sku,
+        color: sku.color,
+        size: sku.size,
+        price: typeof sku.price === 'number' ? sku.price : parseFloat(sku.price) || 0,
+        quantity: sku.quantity ?? 0,
+      }))
+      if (skus.length > 0) {
+        transformed.skus = skus
+        // If every SKU is zero qty, mark as out of stock
+        const hasStock = skus.some((s) => s.quantity > 0)
+        if (!hasStock) {
+          transformed.inStock = false
+        }
+      }
       
       // Add details and review summary if available
       if (productData.details) {

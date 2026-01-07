@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useProducts } from '../context/ProductsContext'
@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { productService } from '../services/productService'
 import { couponService } from '../services/couponService'
 import { getErrorMessage } from '../utils/errorHandler'
-import type { Product, Coupon } from '../types'
+import type { Product, Coupon, ProductSKU } from '../types'
 import Button from '../components/Button'
 import LoginModal from '../components/LoginModal'
 import { fadeInUp } from '../utils/animations'
@@ -18,32 +18,16 @@ const ProductDetailPage: React.FC = () => {
   const { getProductById } = useProducts()
   const { addToCart } = useCart()
   const { user } = useAuth()
+  // Refs first
+  const fetchedProductRef = useRef<string | null>(null)
+  const fetchedReviewsRef = useRef<string | null>(null)
+
+  // State next
   const [product, setProduct] = useState<Product | undefined>(id ? getProductById(id) : undefined)
+  const [skus, setSkus] = useState<ProductSKU[]>(product?.skus || [])
   const [loading, setLoading] = useState(!product)
   const [error, setError] = useState('')
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-
-  useEffect(() => {
-    if (id && !product) {
-      const fetchProduct = async () => {
-        try {
-          const fetchedProduct = await productService.getProductById(id)
-          if (!fetchedProduct) {
-            setError('Product not found')
-          } else {
-            setProduct(fetchedProduct)
-          }
-        } catch (error) {
-          console.error('Failed to fetch product:', error)
-          setError(getErrorMessage(error, 'Failed to load product. Please try again.'))
-        } finally {
-          setLoading(false)
-        }
-      }
-      fetchProduct()
-    }
-  }, [id, product])
-
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedSize, setSelectedSize] = useState('')
   const [selectedColor, setSelectedColor] = useState('')
@@ -61,35 +45,71 @@ const ProductDetailPage: React.FC = () => {
   const [loadingReviews, setLoadingReviews] = useState(false)
   const [coupons, setCoupons] = useState<Coupon[]>([])
   const [loadingCoupons, setLoadingCoupons] = useState(false)
-  
-  // Get review summary from product or use defaults
-  const reviewSummary = product?.reviewSummary || {
-    average_rating: 0,
-    total_ratings: 0,
-    total_reviews: 0,
-    rating_breakdown: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
-  }
-  
-  const rating = reviewSummary.average_rating
-  const ratingCount = reviewSummary.total_ratings
-  const reviewCount = reviewSummary.total_reviews
+
+  useEffect(() => {
+    if (!id) return
+    if (fetchedProductRef.current === id) return
+
+    const fetchProduct = async () => {
+      setLoading(true)
+      try {
+        // Use cached product from context if available and complete
+        const cached = getProductById(id)
+        if (cached && cached.skus) {
+          setProduct(cached)
+          setSkus(cached.skus)
+          const firstAvailable = cached.skus.find((s) => s.quantity > 0)
+          if (firstAvailable) {
+            setSelectedColor(firstAvailable.color)
+            setSelectedSize(firstAvailable.size)
+          }
+          return
+        }
+
+        const fetchedProduct = await productService.getProductById(id)
+        if (!fetchedProduct) {
+          setError('Product not found')
+        } else {
+          setProduct(fetchedProduct)
+          if (fetchedProduct.skus) {
+            setSkus(fetchedProduct.skus)
+            const firstAvailable = fetchedProduct.skus.find((s) => s.quantity > 0)
+            if (firstAvailable) {
+              setSelectedColor(firstAvailable.color)
+              setSelectedSize(firstAvailable.size)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch product:', error)
+        setError(getErrorMessage(error, 'Failed to load product. Please try again.'))
+      } finally {
+        setLoading(false)
+        fetchedProductRef.current = id
+      }
+    }
+
+    fetchProduct()
+  }, [id, getProductById])
 
   // Fetch reviews when product is loaded
   useEffect(() => {
-    if (id && product) {
-      const fetchReviews = async () => {
-        setLoadingReviews(true)
-        try {
-          const reviewsData = await productService.getProductReviews(id)
-          setReviews(reviewsData)
-        } catch (error) {
-          console.error('Failed to fetch reviews:', error)
-        } finally {
-          setLoadingReviews(false)
-        }
+    if (!id || !product) return
+    if (fetchedReviewsRef.current === id) return
+
+    const fetchReviews = async () => {
+      setLoadingReviews(true)
+      try {
+        const reviewsData = await productService.getProductReviews(id)
+        setReviews(reviewsData)
+      } catch (error) {
+        console.error('Failed to fetch reviews:', error)
+      } finally {
+        setLoadingReviews(false)
+        fetchedReviewsRef.current = id
       }
-      fetchReviews()
     }
+    fetchReviews()
   }, [id, product])
 
   // Fetch available coupons
@@ -108,7 +128,55 @@ const ProductDetailPage: React.FC = () => {
     fetchCoupons()
   }, [])
 
-  if (loading) {
+  // Compute SKU/state helpers
+  const effectiveSkus = useMemo(() => product?.skus || skus, [product?.skus, skus])
+  const hasSkus = effectiveSkus.length > 0
+  const availableSkus = useMemo(() => effectiveSkus.filter((s) => s.quantity > 0), [effectiveSkus])
+  const selectedSku = useMemo(
+    () => effectiveSkus.find((s) => s.color === selectedColor && s.size === selectedSize),
+    [effectiveSkus, selectedColor, selectedSize]
+  )
+  const isProductOutOfStock = hasSkus
+    ? availableSkus.length === 0
+    : !product?.inStock
+  const maxAvailableQty = selectedSku?.quantity ?? 0
+  const displayPrice = selectedSku?.price ?? product?.price ?? 0
+
+  // Debug logging for variant selection / stock issues
+  useEffect(() => {
+    if (!product) return
+  }, [product, hasSkus, effectiveSkus, availableSkus, selectedColor, selectedSize, selectedSku, isProductOutOfStock, maxAvailableQty])
+
+  useEffect(() => {
+    if (!hasSkus) return
+    // If selection exceeds stock, clamp quantity
+    if (selectedSku && quantity > selectedSku.quantity) {
+      setQuantity(selectedSku.quantity || 1)
+    }
+  }, [hasSkus, selectedSku, quantity])
+
+  const availableColors = useMemo(() => {
+    if (!hasSkus) return product?.colors || []
+    const colors = new Set<string>()
+    effectiveSkus.forEach((sku) => {
+      if (sku.quantity > 0) colors.add(sku.color)
+    })
+    return Array.from(colors)
+  }, [hasSkus, effectiveSkus, product?.colors])
+
+  const availableSizes = useMemo(() => {
+    if (!hasSkus) return product?.sizes || []
+    const sizes = new Set<string>()
+    effectiveSkus.forEach((sku) => {
+      if (sku.quantity > 0 && (!selectedColor || sku.color === selectedColor)) {
+        sizes.add(sku.size)
+      }
+    })
+    return Array.from(sizes)
+  }, [hasSkus, effectiveSkus, product?.sizes, selectedColor])
+
+  // Guard rendering until product is available; narrows type for rest of component
+  if (loading || (!product && !error)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
@@ -145,26 +213,54 @@ const ProductDetailPage: React.FC = () => {
     )
   }
 
+  // From here, product is defined
+  const productData = product as Product
+
+  // From here, product is defined
+  const reviewSummary = productData.reviewSummary || {
+    average_rating: 0,
+    total_ratings: 0,
+    total_reviews: 0,
+    rating_breakdown: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+  }
+  
+  const rating = reviewSummary.average_rating
+  const ratingCount = reviewSummary.total_ratings
+  const reviewCount = reviewSummary.total_reviews
+
   const handleAddToCart = () => {
     if (!user) {
       setIsLoginModalOpen(true)
       return
     }
 
-    if (!selectedSize || !selectedColor) {
-      alert('Please select size and color')
-      return
+    const requireVariant = hasSkus && availableSkus.length > 0
+
+    // For products without SKUs, do not block on size/color; use defaults if present
+    const finalColor = selectedColor || productData.colors?.[0] || 'default'
+    const finalSize = selectedSize || productData.sizes?.[0] || 'default'
+
+    if (requireVariant) {
+      if (!selectedSize || !selectedColor || !selectedSku) {
+        alert('Please select an available color and size')
+        return
+      }
+      if (selectedSku.quantity <= 0) {
+        alert('This variant is out of stock')
+        return
+      }
     }
 
     setIsAdding(true)
     addToCart({
-      productId: product.id,
-      name: product.name,
-      image: product.images[0],
-      price: product.price,
-      size: selectedSize,
-      color: selectedColor,
+      productId: productData.id,
+      name: productData.name,
+      image: productData.images[0],
+      price: requireVariant && selectedSku ? selectedSku.price ?? productData.price : productData.price,
+      size: requireVariant ? selectedSize : finalSize,
+      color: requireVariant ? selectedColor : finalColor,
       quantity,
+      skuId: requireVariant && selectedSku ? selectedSku.id : undefined,
     })
 
     setTimeout(() => {
@@ -174,12 +270,12 @@ const ProductDetailPage: React.FC = () => {
     }, 300)
   }
 
-  const discount = product.originalPrice && typeof product.originalPrice === 'number' && product.originalPrice > product.price
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+  const discount = productData.originalPrice && typeof productData.originalPrice === 'number' && productData.originalPrice > displayPrice
+    ? Math.round(((productData.originalPrice - displayPrice) / productData.originalPrice) * 100)
     : 0
 
-  const savings = product.originalPrice && typeof product.originalPrice === 'number' && product.originalPrice > product.price
-    ? product.originalPrice - product.price
+  const savings = productData.originalPrice && typeof productData.originalPrice === 'number' && productData.originalPrice > displayPrice
+    ? productData.originalPrice - displayPrice
     : 0
 
   const toggleSection = (section: string) => {
@@ -233,9 +329,9 @@ const ProductDetailPage: React.FC = () => {
           <li className="text-neutral-400">/</li>
           <li><Link to="/products" className="hover:text-primary transition-colors">Products</Link></li>
           <li className="text-neutral-400">/</li>
-          <li><span className="text-primary capitalize">{product.category}</span></li>
+          <li><span className="text-primary capitalize">{productData.category}</span></li>
           <li className="text-neutral-400">/</li>
-          <li className="text-primary truncate max-w-xs">{product.name}</li>
+          <li className="text-primary truncate max-w-xs">{productData.name}</li>
         </ol>
       </nav>
 
@@ -254,8 +350,8 @@ const ProductDetailPage: React.FC = () => {
             <AnimatePresence mode="wait">
               <motion.img
                 key={selectedImage}
-                src={product.images[selectedImage] || product.images[0]}
-                alt={product.name}
+                src={productData.images[selectedImage] || productData.images[0]}
+                alt={productData.name}
                 className="w-full h-full object-cover"
                 style={{
                   width: '100%',
@@ -271,14 +367,14 @@ const ProductDetailPage: React.FC = () => {
               />
             </AnimatePresence>
           </motion.div>
-          {product.images.length > 1 && (
+              {productData.images.length > 1 && (
             <motion.div
               className="grid grid-cols-4 gap-3"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              {product.images.map((image, index) => (
+              {productData.images.map((image, index) => (
                 <motion.button
                   key={index}
                   onClick={() => setSelectedImage(index)}
@@ -290,7 +386,7 @@ const ProductDetailPage: React.FC = () => {
                 >
                   <img
                     src={image}
-                    alt={`${product.name} ${index + 1}`}
+                    alt={`${productData.name} ${index + 1}`}
                     className="w-full h-full object-cover"
                     style={{
                       width: '100%',
@@ -314,15 +410,22 @@ const ProductDetailPage: React.FC = () => {
           className="space-y-6"
         >
           {/* Badge */}
-          {product.featured && (
-            <span className="inline-block text-[10px] font-semibold text-primary uppercase tracking-wider bg-yellow-100 px-3 py-1 rounded">
-              BESTSELLER
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+          {productData.featured && (
+              <span className="inline-block text-[10px] font-semibold text-primary uppercase tracking-wider bg-yellow-100 px-3 py-1 rounded">
+                BESTSELLER
+              </span>
+            )}
+            {isProductOutOfStock && (
+              <span className="inline-block text-[10px] font-semibold text-red-600 uppercase tracking-wider bg-red-50 px-3 py-1 rounded border border-red-200">
+                Out of Stock
+              </span>
+            )}
+          </div>
 
           {/* Product Name */}
           <h1 className="text-2xl md:text-3xl font-heading font-medium text-primary leading-tight">
-            {product.name}
+            {productData.name}
           </h1>
 
           {/* Rating */}
@@ -339,11 +442,11 @@ const ProductDetailPage: React.FC = () => {
           {/* Pricing */}
           <div className="space-y-2">
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-semibold text-primary">₹{product.price.toFixed(2)}</span>
-              {product.originalPrice && typeof product.originalPrice === 'number' && (
+              <span className="text-3xl font-semibold text-primary">₹{displayPrice.toFixed(2)}</span>
+              {productData.originalPrice && typeof productData.originalPrice === 'number' && (
                 <>
                   <span className="text-lg text-neutral-500 line-through">
-                    ₹{product.originalPrice.toFixed(2)}
+                    ₹{productData.originalPrice.toFixed(2)}
                   </span>
                   {discount > 0 && (
                     <span className="text-sm font-semibold text-green-600">
@@ -358,7 +461,13 @@ const ProductDetailPage: React.FC = () => {
                 You save ₹{savings.toFixed(2)} on this purchase
               </p>
             )}
-            <p className="text-xs text-neutral-600">Inclusive of all taxes</p>
+            <p className="text-xs text-neutral-600">
+              {isProductOutOfStock
+                ? 'Currently unavailable'
+                : hasSkus
+                  ? `Inclusive of all taxes${selectedSku ? ` • ${selectedSku.quantity} in stock` : ''}`
+                  : 'Inclusive of all taxes'}
+            </p>
           </div>
 
           {/* Color Selector */}
@@ -369,17 +478,20 @@ const ProductDetailPage: React.FC = () => {
               </label>
             </div>
             <div className="flex flex-wrap gap-3">
-              {product.colors.map((color) => (
+              {availableColors.map((color) => {
+                const isColorAvailable = availableSkus.length === 0 || availableSkus.some((sku) => sku.color === color)
+                return (
                 <motion.button
                   key={color}
-                  onClick={() => setSelectedColor(color)}
+                  onClick={() => isColorAvailable && setSelectedColor(color)}
                   className={`relative border-2 transition-all duration-200 rounded-sm overflow-hidden ${
                     selectedColor === color
                       ? 'border-primary ring-2 ring-primary ring-offset-2'
                       : 'border-soft hover:border-primary/50'
-                  }`}
+                  } ${!isColorAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  disabled={!isColorAvailable}
                 >
                   <div className="w-16 h-16 bg-soft flex items-center justify-center">
                     <span className="text-xs font-medium text-primary uppercase">{color}</span>
@@ -392,7 +504,7 @@ const ProductDetailPage: React.FC = () => {
                     </div>
                   )}
                 </motion.button>
-              ))}
+              )})}
             </div>
           </div>
 
@@ -405,21 +517,26 @@ const ProductDetailPage: React.FC = () => {
               <button className="text-xs text-primary hover:underline">Size Guide</button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {product.sizes.map((size) => (
+              {availableSizes.map((size) => {
+                const isSizeAvailable =
+                  availableSkus.length === 0 ||
+                  availableSkus.some((sku) => sku.size === size && (!selectedColor || sku.color === selectedColor))
+                return (
                 <motion.button
                   key={size}
-                  onClick={() => setSelectedSize(size)}
+                  onClick={() => isSizeAvailable && setSelectedSize(size)}
                   className={`px-5 py-2.5 border-2 transition-all duration-200 text-sm font-medium uppercase tracking-wider ${
                     selectedSize === size
                       ? 'border-primary bg-primary text-background'
                       : 'border-soft text-primary hover:border-primary bg-background'
-                  }`}
+                  } ${!isSizeAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
                   whileHover={{ opacity: 0.8 }}
                   whileTap={{ scale: 0.98 }}
+                  disabled={!isSizeAvailable}
                 >
                   {size}
                 </motion.button>
-              ))}
+              )})}
             </div>
           </div>
 
@@ -431,9 +548,10 @@ const ProductDetailPage: React.FC = () => {
             <div className="flex items-center gap-4 w-fit">
               <motion.button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-10 h-10 border-2 border-soft flex items-center justify-center hover:border-primary transition-colors"
+                className="w-10 h-10 border-2 border-soft flex items-center justify-center hover:border-primary transition-colors disabled:opacity-50"
                 whileHover={{ opacity: 0.7 }}
                 whileTap={{ scale: 0.95 }}
+                disabled={isProductOutOfStock || !selectedSku}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
@@ -449,10 +567,11 @@ const ProductDetailPage: React.FC = () => {
                 {quantity}
               </motion.span>
               <motion.button
-                onClick={() => setQuantity(quantity + 1)}
-                className="w-10 h-10 border-2 border-soft flex items-center justify-center hover:border-primary transition-colors"
+                onClick={() => setQuantity(Math.min(quantity + 1, maxAvailableQty || quantity + 1))}
+                className="w-10 h-10 border-2 border-soft flex items-center justify-center hover:border-primary transition-colors disabled:opacity-50"
                 whileHover={{ opacity: 0.7 }}
                 whileTap={{ scale: 0.95 }}
+                disabled={isProductOutOfStock || !selectedSku || maxAvailableQty <= 0}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -467,11 +586,17 @@ const ProductDetailPage: React.FC = () => {
               fullWidth
               size="lg"
               onClick={handleAddToCart}
-              disabled={isAdding || !product.inStock}
+              disabled={isAdding || isProductOutOfStock || !selectedSku || selectedSku.quantity <= 0}
               variant="primary"
               className="text-base font-medium"
             >
-              {isAdding ? 'Adding...' : 'Add to Bag'}
+              {isProductOutOfStock
+                ? 'Out of Stock'
+                : !selectedSku || selectedSku.quantity <= 0
+                  ? 'Select available variant'
+                  : isAdding
+                    ? 'Adding...'
+                    : 'Add to Bag'}
             </Button>
             <Button
               variant="outline"
@@ -497,7 +622,7 @@ const ProductDetailPage: React.FC = () => {
             )}
           </AnimatePresence>
 
-          {!product.inStock && (
+          {!productData.inStock && (
             <p className="text-sm text-red-600 font-medium">This item is currently out of stock</p>
           )}
 
@@ -655,7 +780,7 @@ const ProductDetailPage: React.FC = () => {
                   exit={{ opacity: 0, height: 0 }}
                   className="text-sm text-neutral-600 pt-2"
                 >
-                  <p className="leading-relaxed">{product.description}</p>
+                  <p className="leading-relaxed">{productData.description}</p>
                 </motion.div>
               )}
             </div>

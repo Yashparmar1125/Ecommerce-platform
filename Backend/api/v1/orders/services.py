@@ -177,6 +177,10 @@ class OrderService:
             # Refresh coupon to get updated count (for verification)
             coupon.refresh_from_db()
             logger.info(f"Coupon {coupon.code} - used_count after update: {coupon.used_count}")
+            # Deactivate coupon automatically if limit reached
+            if coupon.usage_limit is not None and coupon.used_count >= coupon.usage_limit:
+                Coupon.objects.filter(id=coupon.id).update(is_active=False)
+                logger.info(f"Coupon {coupon.code} deactivated after reaching usage limit")
         elif coupon:
             logger.warning(f"Coupon {coupon.code} was provided but discount is 0 (discount: {coupon_discount})")
         

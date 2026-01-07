@@ -55,10 +55,10 @@ class ProductDetailView(APIView):
     
     def get(self, request, product_id):
         # Get product using service
-        product = ProductServices.get_product(product_id)
+        product = ProductServices.get_product(product_id, include_out_of_stock=True)
         
         # Get SKUs using service
-        skus = ProductServices.get_product_skus(product)
+        skus = ProductServices.get_product_skus(product, include_out_of_stock=True)
         
         # Get recent reviews (limit to 5 for detail page)
         from apps.products.models import ProductReview

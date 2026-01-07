@@ -10,8 +10,18 @@ export interface Product {
   colors: string[]
   inStock: boolean
   featured?: boolean
+  skus?: ProductSKU[]
   details?: ProductDetails
   reviewSummary?: ReviewSummary
+}
+
+export interface ProductSKU {
+  id: number
+  sku: string
+  color: string
+  size: string
+  price: number
+  quantity: number
 }
 
 export interface ProductDetails {
