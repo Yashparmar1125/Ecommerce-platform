@@ -172,6 +172,9 @@ export const registerUser = (email: string, password: string, first_name: string
     return api.post('/users/register/', { email, password, first_name, last_name})
 }
 
+export const logoutUser = (refreshToken: string) => {
+    return api.post('/users/logout/', { refresh: refreshToken })
+}
 // Address API functions
 export const addressApi = {
     getAddresses: () => api.get('/users/addresses/'),

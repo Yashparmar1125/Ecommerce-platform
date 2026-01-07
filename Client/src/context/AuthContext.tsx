@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import type { ReactNode } from 'react'
 import type { User, Order } from '../types'
 
-import { emailLogin, getUser, registerUser } from '../api/axios.api'
+import { emailLogin, getUser, registerUser, logoutUser } from '../api/axios.api'
 
 interface AuthContextType {
   user: User | null
@@ -10,7 +10,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>
   register: (name: string, email: string, password: string) => Promise<boolean>
   loginWithGoogle: () => Promise<boolean>
-  logout: () => void
+  logout: () => Promise<void>
   addOrder: (order: Omit<Order, 'id' | 'date'>) => void
 }
 
@@ -20,14 +20,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null)
   const [orders, setOrders] = useState<Order[]>([])
 
-  const logout = useCallback(() => {
-    setUser(null)
-    setOrders([])
-    localStorage.removeItem('user')
-    localStorage.removeItem('token')
-    localStorage.removeItem('refreshToken')
-    localStorage.removeItem('orders')
+  const logout = useCallback(async () => {
+    const refreshToken = localStorage.getItem('refreshToken')
+  
+    try {
+      if (refreshToken) {
+        await logoutUser(refreshToken)
+      }
+    } catch (error) {
+      console.error('Logout API failed:', error)
+      // still continue cleanup
+    } finally {
+      setUser(null)
+      setOrders([])
+      localStorage.removeItem('user')
+      localStorage.removeItem('token')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('orders')
+    }
   }, [])
+  
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user')
