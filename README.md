@@ -58,27 +58,223 @@ The system includes comprehensive modules for user authentication, product manag
 ## 📂 Project Structure
 
 ```ascii
-Ecommerce-Platform/
-├── ⚙️ Backend/                 # Django API Server
-│   ├── 📂 api/v1/              # API Version 1 Endpoints
-│   │   ├── 🩺 health/          # System Health Checks
-│   │   ├── 📦 products/        # Product Catalog API
-│   │   └── 👤 users/           # User Auth API
-│   ├── 📂 apps/                # Core Business Logic
-│   │   ├── cart/               # Shopping Cart Logic
-│   │   ├── orders/             # Order Processing
-│   │   ├── payments/           # Payment Integration
-│   │   └── wishlist/           # User Wishlist
-│   ├── 📂 config/              # Project Settings (Base, Local, Prod)
-│   └── 📄 manage.py            # Django Entry Point
+Ecommerce-DRF/
 │
-├── 💻 Client/                  # React Frontend Application
-│   ├── 📂 src/
-│   └── 📂 public/
+├── ⚙️ Backend/                          # Django REST Framework API Server
+│   ├── 📂 api/                          # API Layer
+│   │   ├── __init__.py
+│   │   └── 📂 v1/                       # API Version 1
+│   │       ├── __init__.py
+│   │       ├── views.py                 # API docs view handlers
+│   │       ├── urls.py                  # Main API router
+│   │       ├── 📂 admin/                # Admin API endpoints
+│   │       │   ├── permissions.py      # Admin permission classes
+│   │       │   ├── serializers.py      # Admin serializers
+│   │       │   ├── services.py         # Admin business logic
+│   │       │   ├── urls.py
+│   │       │   └── views.py            # Admin CRUD views
+│   │       ├── 📂 cart/                 # Shopping Cart API
+│   │       │   ├── serializer.py
+│   │       │   ├── urls.py
+│   │       │   └── views.py
+│   │       ├── 📂 health/               # Health Check API
+│   │       │   ├── serializer.py
+│   │       │   ├── urls.py
+│   │       │   └── views.py            # System status endpoint
+│   │       ├── 📂 orders/               # Order Management API
+│   │       │   ├── serializer.py
+│   │       │   ├── services.py         # Order processing logic
+│   │       │   ├── urls.py
+│   │       │   └── views.py
+│   │       ├── 📂 payments/             # Payment Processing API
+│   │       │   ├── serializer.py
+│   │       │   ├── urls.py
+│   │       │   └── views.py
+│   │       ├── 📂 products/             # Product Catalog API
+│   │       │   ├── serializer/         # Modular serializers
+│   │       │   │   ├── category.py
+│   │       │   │   ├── coupon.py
+│   │       │   │   ├── product.py
+│   │       │   │   ├── review.py
+│   │       │   │   └── sku.py
+│   │       │   ├── services.py         # Product business logic
+│   │       │   ├── urls.py
+│   │       │   └── 📂 views/           # View modules
+│   │       │       ├── admin.py        # Admin product views
+│   │       │       ├── coupons.py      # Coupon endpoints
+│   │       │       ├── public.py       # Public product endpoints
+│   │       │       ├── reviews.py      # Review endpoints
+│   │       │       └── sku.py          # SKU management
+│   │       └── 📂 users/                # User & Auth API
+│   │           ├── serializer.py
+│   │           ├── services.py         # Auth business logic
+│   │           ├── urls.py
+│   │           └── views.py
+│   │
+│   ├── 📂 apps/                          # Django Applications (Business Logic)
+│   │   ├── __init__.py
+│   │   ├── 📂 cart/                      # Shopping Cart App
+│   │   │   ├── admin.py
+│   │   │   ├── models.py                # Cart & CartItem models
+│   │   │   ├── migrations/
+│   │   │   └── tests.py
+│   │   ├── 📂 orders/                    # Order Management App
+│   │   │   ├── admin.py
+│   │   │   ├── models.py                # Order & OrderItem models
+│   │   │   ├── migrations/
+│   │   │   └── tests.py
+│   │   ├── 📂 payments/                  # Payment Processing App
+│   │   │   ├── admin.py
+│   │   │   ├── models.py                # Payment models
+│   │   │   ├── migrations/
+│   │   │   └── tests.py
+│   │   ├── 📂 products/                  # Product Catalog App
+│   │   │   ├── admin.py
+│   │   │   ├── models.py                # Product, SKU, Category, Review, Coupon models
+│   │   │   ├── migrations/
+│   │   │   ├── 📂 management/commands/  # Django management commands
+│   │   │   │   └── bulk_create_products.py
+│   │   │   └── tests.py
+│   │   ├── 📂 users/                     # User Management App
+│   │   │   ├── admin.py
+│   │   │   ├── models.py                # Custom User & Address models
+│   │   │   ├── migrations/
+│   │   │   └── tests.py
+│   │   └── 📂 wishlist/                  # Wishlist App
+│   │       ├── admin.py
+│   │       ├── models.py                # Wishlist model
+│   │       ├── migrations/
+│   │       └── tests.py
+│   │
+│   ├── 📂 config/                        # Django Project Configuration
+│   │   ├── __init__.py
+│   │   ├── asgi.py                       # ASGI config
+│   │   ├── urls.py                       # Root URL configuration
+│   │   ├── wsgi.py                       # WSGI config
+│   │   └── 📂 settings/                 # Environment-specific settings
+│   │       ├── __init__.py
+│   │       ├── base.py                  # Base settings (shared)
+│   │       ├── local.py                 # Local development settings
+│   │       └── production.py            # Production settings
+│   │
+│   ├── 📂 static/                        # Static Files (CSS, JS, Images)
+│   │   ├── favicon.ico                  # API docs favicon
+│   │   ├── 📂 js/
+│   │   │   └── api-docs.js             # API docs JavaScript
+│   │   └── 📂 sections/                 # API docs HTML sections
+│   │       ├── admin.html
+│   │       ├── authentication.html
+│   │       ├── introduction.html
+│   │       ├── orders.html
+│   │       ├── products.html
+│   │       └── users.html
+│   │
+│   ├── 📂 templates/                     # Django Templates
+│   │   ├── base.html                    # API docs base template
+│   │   └── 📂 sections/                 # API docs section templates
+│   │       ├── admin.html
+│   │       ├── authentication.html
+│   │       ├── introduction.html
+│   │       ├── orders.html
+│   │       ├── products.html
+│   │       └── users.html
+│   │
+│   ├── 📄 manage.py                      # Django management script
+│   ├── 📄 db.sqlite3                     # SQLite database (dev)
+│   ├── 📄 requirements.txt              # Python dependencies
+│   ├── 📄 products_sample.json          # Sample product data
+│   ├── 📄 health.html                    # Health check HTML
+│   ├── 📄 BACKEND_FEATURES_SUMMARY.md   # Backend features documentation
+│   └── 📄 BULK_PRODUCTS_README.md       # Bulk product creation guide
 │
-└── 📄 requirements.txt         # Python Dependencies
+├── 💻 Client/                            # React Frontend Application
+│   ├── 📂 public/                        # Static assets served as-is
+│   │   ├── favicon.ico
+│   │   ├── vite.svg
+│   │   └── 📂 assets/images/            # Product images, banners, icons
+│   │
+│   ├── 📂 src/                           # React source code
+│   │   ├── 📂 api/                      # API client configuration
+│   │   │   └── axios.api.ts            # Axios instance & interceptors
+│   │   ├── 📂 components/               # React components
+│   │   │   ├── 📂 admin/               # Admin dashboard components
+│   │   │   ├── AdminLogin.tsx
+│   │   │   ├── BannerCarousel.tsx
+│   │   │   ├── Button.tsx
+│   │   │   ├── CategorySection.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── LoginModal.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   ├── Navbar.tsx
+│   │   │   ├── ProductCard.tsx
+│   │   │   ├── ProtectedRoute.tsx
+│   │   │   ├── ScrollToTop.tsx
+│   │   │   ├── Select.tsx
+│   │   │   ├── SessionExpiredModal.tsx
+│   │   │   └── SkeletonLoader.tsx
+│   │   ├── 📂 context/                 # React Context providers
+│   │   │   ├── AppProviders.tsx
+│   │   │   ├── AuthContext.tsx         # Authentication state
+│   │   │   ├── CartContext.tsx         # Shopping cart state
+│   │   │   ├── CouponContext.tsx      # Coupon state
+│   │   │   └── ProductsContext.tsx    # Products state
+│   │   ├── 📂 layouts/                 # Layout components
+│   │   │   └── Layout.tsx
+│   │   ├── 📂 pages/                   # Page components
+│   │   │   ├── AdminPage.tsx
+│   │   │   ├── CartPage.tsx
+│   │   │   ├── CheckoutPage.tsx
+│   │   │   ├── HomePage.tsx
+│   │   │   ├── LoginPage.tsx
+│   │   │   ├── OrderDetailPage.tsx
+│   │   │   ├── ProductDetailPage.tsx
+│   │   │   ├── ProductListingPage.tsx
+│   │   │   ├── ProfilePage.tsx
+│   │   │   └── RegisterPage.tsx
+│   │   ├── 📂 services/                # API service functions
+│   │   │   ├── couponService.ts
+│   │   │   └── productService.ts
+│   │   ├── 📂 types/                    # TypeScript type definitions
+│   │   │   ├── admin.ts
+│   │   │   └── index.ts
+│   │   ├── 📂 utils/                    # Utility functions
+│   │   │   ├── animations.ts
+│   │   │   └── errorHandler.ts         # Centralized error handling
+│   │   ├── App.tsx                      # Root component
+│   │   ├── main.tsx                     # Application entry point
+│   │   └── style.css                   # Global styles
+│   │
+│   ├── 📄 index.html                    # HTML template
+│   ├── 📄 package.json                  # Node.js dependencies
+│   ├── 📄 package-lock.json
+│   ├── 📄 tsconfig.json                 # TypeScript configuration
+│   ├── 📄 vite.config.ts                # Vite build configuration
+│   ├── 📄 tailwind.config.js           # Tailwind CSS configuration
+│   ├── 📄 postcss.config.js            # PostCSS configuration
+│   └── 📄 ERROR_HANDLING_SUMMARY.md     # Error handling documentation
+│
+├── 📄 README.md                         # Project documentation (this file)
+├── 📄 FRONTEND_ADMIN_UPDATES_SUMMARY.md # Frontend admin features summary
+└── 📄 .gitignore                        # Git ignore rules
 
 ```
+
+### 📋 Key Directories Explained
+
+**Backend (`Backend/`):**
+- **`api/v1/`**: REST API endpoints organized by feature (products, users, orders, admin, etc.)
+- **`apps/`**: Django apps containing models, migrations, and business logic
+- **`config/`**: Django project settings split by environment (base, local, production)
+- **`static/`**: Static files served by Django (JS, CSS, favicon, API docs sections)
+- **`templates/`**: Django HTML templates for API documentation
+
+**Frontend (`Client/`):**
+- **`src/components/`**: Reusable React components
+- **`src/pages/`**: Page-level components (routes)
+- **`src/context/`**: React Context API for global state management
+- **`src/services/`**: API service functions for backend communication
+- **`src/utils/`**: Utility functions and helpers
 
 ---
 
