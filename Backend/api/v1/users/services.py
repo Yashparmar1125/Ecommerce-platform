@@ -2,6 +2,7 @@
 from django.contrib.auth import authenticate
 from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from apps.users.models import User, Address
 
 class UserService:
@@ -40,8 +41,24 @@ class UserService:
 
     @staticmethod
     def logout(refresh_token):
+        """
+        Blacklist the provided refresh token and remove the corresponding outstanding
+        token entry so it cannot be reused.
+        """
         token = RefreshToken(refresh_token)
+
+        # Blacklist the refresh token (creates BlacklistedToken entry)
         token.blacklist()
+
+        # Remove the specific outstanding token to prevent reuse
+        jti = token["jti"]
+        try:
+            outstanding = OutstandingToken.objects.get(jti=jti)
+            BlacklistedToken.objects.filter(token=outstanding).delete()
+            outstanding.delete()
+        except OutstandingToken.DoesNotExist:
+            # If it's already gone, nothing else to do
+            pass
 
 
 class AddressService:

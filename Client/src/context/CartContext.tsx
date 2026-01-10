@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import type { CartItem } from '../types'
 
@@ -29,24 +29,39 @@ const loadCartFromStorage = (): CartItem[] => {
   return []
 }
 
-// Save cart to localStorage
+// Save cart to localStorage with debouncing
+let saveTimeout: ReturnType<typeof setTimeout> | null = null
 const saveCartToStorage = (items: CartItem[]) => {
-  try {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items))
-  } catch (error) {
-    console.error('Failed to save cart to localStorage:', error)
+  if (saveTimeout) {
+    clearTimeout(saveTimeout)
   }
+  
+  saveTimeout = setTimeout(() => {
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items))
+    } catch (error) {
+      console.error('Failed to save cart to localStorage:', error)
+    }
+  }, 300) // Debounce saves by 300ms
 }
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>(() => loadCartFromStorage())
 
-  // Save cart to localStorage whenever items change
+  // Save cart to localStorage whenever items change (debounced)
   useEffect(() => {
     saveCartToStorage(items)
+    
+    // Cleanup timeout on unmount
+    return () => {
+      if (saveTimeout) {
+        clearTimeout(saveTimeout)
+      }
+    }
   }, [items])
 
-  const addToCart = (item: Omit<CartItem, 'id'>) => {
+  // Memoize functions with useCallback to prevent unnecessary re-renders
+  const addToCart = useCallback((item: Omit<CartItem, 'id'>) => {
     setItems(prev => {
       const existingItem = prev.find(
         i => i.productId === item.productId && 
@@ -55,45 +70,46 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       )
       
       if (existingItem) {
-        const updated = prev.map(i =>
+        return prev.map(i =>
           i.id === existingItem.id
             ? { ...i, quantity: i.quantity + item.quantity }
             : i
         )
-        return updated
       }
       
-      return [...prev, { ...item, id: Date.now().toString() }]
+      return [...prev, { ...item, id: `${Date.now()}-${Math.random()}` }]
     })
-  }
+  }, [])
 
-  const removeFromCart = (id: string) => {
+  const removeFromCart = useCallback((id: string) => {
     setItems(prev => prev.filter(item => item.id !== id))
-  }
+  }, [])
 
-  const updateQuantity = (id: string, quantity: number) => {
+  const updateQuantity = useCallback((id: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(id)
       return
     }
     setItems(prev => prev.map(item => item.id === id ? { ...item, quantity } : item))
-  }
+  }, [removeFromCart])
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setItems([])
     localStorage.removeItem(CART_STORAGE_KEY)
-  }
+  }, [])
 
-  const getTotalPrice = () => {
+  // Memoize computed values
+  const getTotalPrice = useCallback(() => {
     return items.reduce((total, item) => total + item.price * item.quantity, 0)
-  }
+  }, [items])
 
-  const getItemCount = () => {
+  const getItemCount = useCallback(() => {
     return items.reduce((count, item) => count + item.quantity, 0)
-  }
+  }, [items])
 
-  return (
-    <CartContext.Provider value={{
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({
       items,
       addToCart,
       removeFromCart,
@@ -101,7 +117,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       clearCart,
       getTotalPrice,
       getItemCount,
-    }}>
+    }),
+    [items, addToCart, removeFromCart, updateQuantity, clearCart, getTotalPrice, getItemCount]
+  )
+
+  return (
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   )

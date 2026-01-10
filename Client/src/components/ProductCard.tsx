@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo, useCallback, memo } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import type { Product } from '../types'
@@ -9,13 +9,16 @@ interface ProductCardProps {
   index?: number
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
+const ProductCard: React.FC<ProductCardProps> = memo(({ product, index = 0 }) => {
   const [imageIndex, setImageIndex] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
 
-  const discount = product.originalPrice && typeof product.originalPrice === 'number' && product.originalPrice > product.price
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0
+  // Memoize discount calculation
+  const discount = useMemo(() => {
+    return product.originalPrice && typeof product.originalPrice === 'number' && product.originalPrice > product.price
+      ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+      : 0
+  }, [product.originalPrice, product.price])
 
   // Mouse position tracking for tilt effect
   const x = useMotionValue(0)
@@ -23,20 +26,33 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
   const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [10, -10]), { stiffness: 300, damping: 30 })
   const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-10, 10]), { stiffness: 300, damping: 30 })
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  // Memoize event handlers
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
     const centerX = rect.left + rect.width / 2
     const centerY = rect.top + rect.height / 2
     x.set((e.clientX - centerX) / rect.width)
     y.set((e.clientY - centerY) / rect.height)
-  }
+  }, [x, y])
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     x.set(0)
     y.set(0)
     setIsHovered(false)
     setImageIndex(0)
-  }
+  }, [x, y])
+
+  const handleMouseEnter = useCallback(() => {
+    setIsHovered(true)
+    if (product.images.length > 1) {
+      setImageIndex(1)
+    }
+  }, [product.images.length])
+
+  // Memoize image source
+  const imageSrc = useMemo(() => {
+    return product.images[imageIndex] || product.images[0]
+  }, [product.images, imageIndex])
 
   return (
     <motion.div
@@ -63,20 +79,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
         <Link
           to={`/products/${product.id}`}
           className="block flex-1 flex flex-col"
-          onMouseEnter={() => {
-            setIsHovered(true)
-            if (product.images.length > 1) {
-              setImageIndex(1)
-            }
-          }}
+          onMouseEnter={handleMouseEnter}
         >
           {/* Image Container */}
           <div className="relative aspect-square bg-soft overflow-hidden w-full">
             <AnimatePresence mode="wait">
               <motion.img
                 key={imageIndex}
-                src={product.images[imageIndex] || product.images[0]}
+                src={imageSrc}
                 alt={product.name}
+                loading="lazy"
                 className="w-full h-full object-cover"
                 style={{
                   width: '100%',
@@ -222,6 +234,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, index = 0 }) => {
       </motion.div>
     </motion.div>
   )
-}
+}, (prevProps, nextProps) => {
+  // Custom comparison function for React.memo
+  return (
+    prevProps.product.id === nextProps.product.id &&
+    prevProps.product.price === nextProps.product.price &&
+    prevProps.product.inStock === nextProps.product.inStock &&
+    prevProps.product.featured === nextProps.product.featured &&
+    prevProps.product.images.length === nextProps.product.images.length &&
+    prevProps.index === nextProps.index
+  )
+})
+
+ProductCard.displayName = 'ProductCard'
 
 export default ProductCard
