@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react'
 import type { ReactNode } from 'react'
 import type { Product } from '../types'
 import { productService } from '../services/productService'
@@ -28,6 +28,7 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let isMounted = true
     const loadData = async () => {
       try {
         // Load products and categories in parallel for faster loading
@@ -36,29 +37,53 @@ export const ProductsProvider: React.FC<{ children: ReactNode }> = ({ children }
           productService.getCategories()
         ])
         
-        setProducts(productsData)
-        setCategoryObjects(categoriesData)
-        const uniqueCategories = Array.from(new Set(productsData.map(p => p.category)))
-        setCategories(uniqueCategories)
+        // Only update state if component is still mounted
+        if (isMounted) {
+          setProducts(productsData)
+          setCategoryObjects(categoriesData)
+          const uniqueCategories = Array.from(new Set(productsData.map(p => p.category)))
+          setCategories(uniqueCategories)
+        }
       } catch (error) {
         console.error('Failed to load data:', error)
       } finally {
-        setLoading(false)
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
     loadData()
+
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false
+    }
   }, [])
 
-  const getProductById = (id: string) => {
+  // Memoize functions to prevent unnecessary re-renders
+  const getProductById = useCallback((id: string) => {
     return products.find(p => p.id === id)
-  }
+  }, [products])
 
-  const getProductsByCategory = (category: string) => {
+  const getProductsByCategory = useCallback((category: string) => {
     return products.filter(p => p.category === category)
-  }
+  }, [products])
+
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({
+      products,
+      categories,
+      categoryObjects,
+      loading,
+      getProductById,
+      getProductsByCategory,
+    }),
+    [products, categories, categoryObjects, loading, getProductById, getProductsByCategory]
+  )
 
   return (
-    <ProductsContext.Provider value={{ products, categories, categoryObjects, loading, getProductById, getProductsByCategory }}>
+    <ProductsContext.Provider value={contextValue}>
       {children}
     </ProductsContext.Provider>
   )

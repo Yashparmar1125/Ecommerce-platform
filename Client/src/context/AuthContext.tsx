@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import type { User, Order } from '../types'
 
@@ -63,8 +63,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [logout])
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    // Mock authentication - in production, this would call an API
+  // Memoize functions with useCallback to prevent unnecessary re-renders
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     try {
       const response = await emailLogin(email, password)
       if (response.status === 200) {
@@ -84,13 +84,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       return false
     }
-  }
+  }, [])
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    // Mock registration
+  const register = useCallback(async (name: string, email: string, password: string): Promise<boolean> => {
     try {
-      const first_name = name.split(' ')[0]
-      const last_name = name.split(' ')[1]
+      const nameParts = name.split(' ')
+      const first_name = nameParts[0] || ''
+      const last_name = nameParts.slice(1).join(' ') || ''
       const response = await registerUser(email, password, first_name, last_name)
       if (response.status === 201) {
         setUser(response.data.data.user)
@@ -104,10 +104,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       return false
     }
-  }
+  }, [])
 
-  const loginWithGoogle = async (): Promise<boolean> => {
-    // Mock Google login - in production, this would use Google OAuth
+  const loginWithGoogle = useCallback(async (): Promise<boolean> => {
     try {
       // Simulate Google OAuth flow
       await new Promise(resolve => setTimeout(resolve, 1000))
@@ -126,12 +125,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       return false
     }
-  }
+  }, [])
 
-  const addOrder = (order: Omit<Order, 'id' | 'date'>) => {
+  const addOrder = useCallback((order: Omit<Order, 'id' | 'date'>) => {
     const newOrder: Order = {
       ...order,
-      id: Date.now().toString(),
+      id: `${Date.now()}-${Math.random()}`,
       date: new Date().toISOString(),
     }
     setOrders(prev => {
@@ -139,10 +138,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       localStorage.setItem('orders', JSON.stringify(updated))
       return updated
     })
-  }
+  }, [])
+
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({
+      user,
+      orders,
+      login,
+      register,
+      loginWithGoogle,
+      logout,
+      addOrder,
+    }),
+    [user, orders, login, register, loginWithGoogle, logout, addOrder]
+  )
 
   return (
-    <AuthContext.Provider value={{ user, orders, login, register, loginWithGoogle, logout, addOrder }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   )
